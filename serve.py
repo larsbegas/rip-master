@@ -16,7 +16,7 @@ class CGIHTTPRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     """Complete HTTP server with GET, HEAD and POST commands.
 
     GET and HEAD also support running CGI scripts.
-
+ asd
     The POST command is *only* implemented for CGI scripts.
 
     """

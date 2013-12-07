@@ -1,0 +1,173 @@
+/* COMMON */
+.top { vertical-align: top; }
+.center { text-align: center; }
+.width50 { width: 50%; }
+.width100 { width: 100%; }
+
+/* MAIN */
+body {
+	padding: 20px;
+	padding-top: 40px;
+	padding-bottom: 40px;
+	padding-right: 40px;
+	background-color: #666;
+	color: #eee;
+	font-family: Verdana, monospace;
+}
+a {
+	text-decoration: underline;
+	color: #eee;
+}
+
+a:hover {
+	color: #fff;
+	text-decoration: underline;
+	text-shadow:  4px  0px 10px rgba(130, 130, 130, 0.9), 0px  4px 10px rgba(130, 130, 130, 0.9), -4px  0px 10px rgba(130, 130, 130, 0.9), 0px -4px 10px rgba(130, 130, 130, 0.9);
+}
+table.page {
+	background-color: #444;
+	border-radius: 30px;
+	padding: 0px;
+	padding-left: 20px;
+	width: 100%;
+	box-shadow: 10px 10px 5px rgba(0, 0, 0, 0.6);
+	margin-bottom: 20px;
+}
+
+/* HEADER */
+table.header { 
+	padding: 40px;
+	padding-top: 10px;
+	padding-bottom: 15px;
+}
+a.header {
+	text-decoration: none;
+	text-shadow:  4px  0px 10px rgba(150, 150, 150, 0.6), 0px  4px 10px rgba(150, 150, 150, 0.6), -4px  0px 10px rgba(150, 150, 150, 0.6), 0px -4px 10px rgba(150, 150, 150, 0.6);
+}
+div.supheader {
+	font-size: 1.0em;
+	position: relative;
+	top: 28px;
+	left: -50px;
+	letter-spacing: 0.1em;
+}
+div.header {
+	font-size: 4.0em;
+	font-weight: bold;
+	letter-spacing: -0.07em;
+}
+
+/* TIME-SERIES GRAPHS */
+table.graph {
+	cursor: pointer;
+}
+table.graph:hover {
+	background-color: #4A4A4A;
+}
+h1.graph {
+	margin-left: 60px;
+}
+span.arrow {
+	width: auto;
+	height: auto;
+	position: absolute;
+	font-size: 2.3em;
+	padding: 0px;
+	margin: 10px;
+	margin-top: 15px;
+	margin-right: 20px;
+	-webkit-transition: all 500ms ease-in-out;
+	   -moz-transition: all 500ms ease-in-out;
+	     -o-transition: all 500ms ease-in-out;
+	    -ms-transition: all 500ms ease-in-out;
+	        transition: all 500ms ease-in-out;
+}
+.rotate {
+	-webkit-transform: rotate(0deg); 
+	   -moz-transform: rotate(0deg); 
+	    -ms-transform: rotate(0deg); 
+	     -o-transform: rotate(0deg); 
+	        transform: rotate(0deg); 
+}
+.norotate {
+	-webkit-transform: rotate(-90deg); 
+	   -moz-transform: rotate(-90deg); 
+	    -ms-transform: rotate(-90deg); 
+	     -o-transform: rotate(-90deg); 
+	        transform: rotate(-90deg); 
+}
+img.spinner {
+	width: 250px;
+	height: 250px;
+}
+div.graph {
+	margin-top: 10px;
+	display: none;
+	height: 500px;
+	text-align: center;
+	margin-right: 20px;
+	margin-bottom: 20px;
+	width: auto;
+}
+
+#bottom_bar {
+	background-color: #444;
+	width: 100%;
+	position: fixed;
+	left: 0px;
+	top: 0px;
+	border-bottom-left-radius: 10px;
+	border-bottom-right-radius: 10px;
+	box-shadow: 0px 5px 5px rgba(0, 0, 0, 0.6);
+}
+table.bottom {
+	max-height: 10px;
+	width: 100%;
+}
+td.bottom {
+	white-space: nowrap;
+	padding-bottom: 5px;
+	margin: 0px;
+}
+td.donate {
+	text-align: right;
+	width: 99%;
+	padding-right: 20px;
+}
+td.donate:hover {
+	background-color: #444;
+}
+td.bottom_active {
+	background-color: #454;
+}
+td.bottom:hover {
+	background-color: #555;
+}
+a.bottom {
+	text-decoration: none;
+	font-size: 1.0em;
+	font-weight: bold;
+	padding: 15px;
+	padding-bottom: 8px;
+	padding-left: 20px;
+	padding-right: 20px;
+}
+a.bottom:hover {
+	background-color: #555;
+	text-shadow:  4px  0px 5px rgba(130, 130, 130, 0.9),
+	              0px  4px 5px rgba(130, 130, 130, 0.9),
+	             -4px  0px 5px rgba(130, 130, 130, 0.9),
+	              0px -4px 5px rgba(130, 130, 130, 0.9);
+	text-decoration: none;
+}
+
+div.donate_button input {
+	background: transparent url(../donate.png);
+	cursor: pointer;
+	width:  92px;
+	height: 26px;
+	border: none;
+}
+div.donate_button input:hover {
+	background: transparent url(../donate_color.png);
+}

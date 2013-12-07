@@ -1,0 +1,508 @@
+<!doctype html>
+<html>
+	<head>
+		<title>MBOOK' album ripper | rarchives.com</title>
+		<meta name="description" content="Download imgur albums in their entirety. This ripper will grab the highest-quality versions of the images and retain the sort order. Works within the browser -- no download required.">
+		<meta charset="UTF-8">
+		
+		<link href="./css/rip.css" rel="stylesheet" type="text/css">
+	</head>
+
+	<body>
+		<table id="maintable">
+			<tr>
+				<!-- Page title & subheader -->
+				<td class="top">
+					<table class="page header width100">
+						<tr>
+							<td class="width100">
+								<a class="header" href="./">
+									<div class="supheader center">rarchives.com</div>
+									<div class="header center">album ripper</div>
+								</a>
+							</td>
+						</tr><tr>
+							<td>
+								<div class="subheader">rip and zip albums from various sites</div>
+							</td>
+						</tr><tr>
+							<!-- Ripper inputs -->
+							<td class="textbox">
+								<input class="textbox"
+											 type ="text" 
+											 id   ="rip_text" 
+											 value="http://imgur.com/a/RdXNa" 
+											 size =38
+											 onFocus="this.select();" />
+							</td>
+						</tr><tr>
+							<!-- Ripper buttons -->
+							<td class="button">
+								<table class="width100 center">
+									<tr>
+										<td class="center">
+											<input class  ="button"
+											       type   ="button"
+											       id     ="rip_button"
+											       value  ="rip &amp; zip"
+											       onClick="startRip();" />
+										</td><td class="left">
+											<label id="label_cached" class="checkbox" style="display: none">
+												<input class="checkbox"
+												       type   ="checkbox"
+												       id     ="rip_cached"
+												       style  ="display: none"
+												       checked="checked">
+													use cache
+												</label>
+									</tr>
+								</table>
+							</td>
+						</tr><tr>
+							<!-- Status & Progress bar -->
+							<td>
+								<div class="statusbar" id="status_bar">&nbsp;</div>
+								<div id="progress_bar_div">
+									<progress id="progress_bar" value="22" max="100"></progress>
+								</div>
+							</td>
+						</tr><tr>
+							<!-- Compatibile sites list -->
+							<td>
+								<hr>
+								<div class="sites_header">
+									compatible with albums found on
+								</div>
+								<table class="width100">
+									<tr>   <td class="center"> <a class="site" onclick="setExample('imgur')       "><div class="site">imgur</div></a>
+										</td><td class="center"> <a class="site" onclick="setExample('tumblr');     "><div class="site">tumblr</div></a>
+										</td><td class="center"> <a class="site" onclick="setExample('twitter');    "><div class="site">twitter</div></a>
+										</td><td class="center"> <a class="site" onclick="setExample('deviantart'); "><div class="site">deviantart</div></a>
+									</td></tr><tr>
+												 <td class="center"> <a class="site" onclick="setExample('flickr');     "><div class="site">flickr</div></a>
+										<!-- </td><td class="center"> <a class="site" onclick="setExample('photobucket');"><div class="site">photobucket</div></a> -->
+										</td><td class="center"> <a class="site" onclick="setExample('seenive');"><div class="site">seenive</div></a>
+										</td><td class="center"> <a class="site" onclick="setExample('imagebam');   "><div class="site">imagebam</div></a>
+										</td><td class="center"> <a class="site" onclick="setExample('imagefap');   "><div class="site">imagefap</div></a>
+									</td></tr><tr>
+												 <td class="center"> <a class="site" onclick="setExample('imagearn');   "><div class="site">imagearn</div></a>
+										</td><td class="center"> <a class="site" onclick="setExample('webstagram'); "><div class="site">instagram</div></a>
+										</td><td class="center"> <a class="site" onclick="setExample('xhamster');   "><div class="site">xhamster</div></a>
+										</td><td class="center"> <a class="site" onclick="setExample('getgonewild');"><div class="site">getgonewild</div></a>
+									</td></tr><tr>
+												 <td class="center"> <a class="site" onclick="setExample('anonib');     "><div class="site">anonib</div></a>
+										</td><td class="center"> <a class="site" onclick="setExample('minus');      "><div class="site">minus</div></a>
+										</td><td class="center"> <a class="site" onclick="setExample('4chan');      "><div class="site">4chan</div></a>
+										<!-- </td><td class="center"> <a class="site" onclick="setExample('motherless'); "><div class="site">motherless</div></a> -->
+										</td><td class="center"> <a class="site" onclick="setExample('nfsfw'); "><div class="site">nfsfw</div></a>
+									</td></tr><tr>
+												 <td class="center"> <a class="site" onclick="setExample('gifyo');     "><div class="site">gifyo</div></a>
+										</td><td class="center"> <a class="site" onclick="setExample('cghub');     "><div class="site">cghub</div></a>
+										</td><td class="center"> <a class="site" onclick="setExample('chansluts'); "><div class="site">chansluts</div></a>
+										</td><td class="center"> <a class="site" onclick="setExample('teenplanet');"><div class="site">teenplanet</div></a>
+									</td></tr><tr>
+												 <td class="center"> <a class="site" onclick="setExample('imgbox');    "><div class="site">imgbox</div></a>
+										</td><td class="center"> <a class="site" onclick="setExample('buttoucher');"><div class="site">butttoucher</div></a>
+										</td><td class="center"> <a class="site" onclick="setExample('reddit');    "><div class="site">reddit</div></a>
+										</td><td class="center"> <a class="site" onclick="setExample('fuskator');  "><div class="site">fuskator</div></a>
+									</td></tr><tr>
+												 <td class="center"> <a class="site" onclick="setExample('fapdu');      "><div class="site">fapdu</div></a>
+										</td><td class="center"> <a class="site" onclick="setExample('kodiefiles'); "><div class="site">kodiefiles</div></a>
+										</td><td class="center"> <a class="site" onclick="setExample('redditsluts');"><div class="site">redditsluts</div></a>
+										</td><td class="center"> <a class="site" onclick="setExample('gallerydump');"><div class="site">gallerydump</div></a>
+										</td>
+									</tr>
+								</table>
+							</td>
+						</tr>
+					</table>
+			
+					<div class="spacer"></div>
+					
+					<!-- Recent rips -->
+
+					<table class="page width100">
+						<tr>
+							<td class="title width100">
+								recent rips
+							</td>
+							<td class="nowrap right vcenter">
+								<img id="recent_spinner"
+								     class="hidden"
+								     src="./images/spinner_dark.gif">
+								<a href="" 
+								   class="fontsmall"
+									 onclick="refreshRecent(); return false;">
+									 refresh
+								 </a>
+							</td>
+						</tr><tr>
+							<td class="recent" colspan="2">
+								<div id="recent">
+								</div>
+								<br>
+								<div class="fontsmall center">
+									large list of recent rips can be found <a href="recent_rips.lst" target="_BLANK"><b>here</b></a>
+								</div>
+							</td>
+						</tr>
+					</table>
+
+
+				</td><td class="top hspacer">
+				
+					<!-- Video ripper -->
+
+					<table class="page">
+						<tr>
+							<td colspan="2" class="title" style="font-size: 2.0em">
+								video ripper
+							</td>
+						</tr><tr>
+							<td class="center">
+								<div id="video_desc">
+									download videos found on 
+									<span id="video_sites" class="underline pointer">various websites</span>
+								</div>
+							</td>
+						</tr><tr>
+							<td class="center">
+								<table class="width100">
+									<tr>
+										<td>
+											url:
+										</td><td>
+											<input class="textbox"
+											       type ="text" 
+											       id   ="vid_text" 
+											       value="http://www.xvideos.com/video1861562/ebony_girl_first_time" 
+											       size =39
+														 onFocus="this.select()" />
+										</td>
+									</tr>
+								</table>
+							</td>
+						</tr><tr>
+							<td class="button" colspan="2">
+								<input class="button"
+								       type ="button"
+								       id   ="vid_button"
+								       value="get video link"
+								       onClick="startVid()" />
+							</td>
+						</tr><tr>
+							<td colspan="2">
+								<div class="statusbar center" id="vid_status">&nbsp;</div>
+							</td>
+						</tr>
+					</table>
+			
+					<table id="user_rips_tab" class="page not_displayed">
+						<tr>
+							<td class="title">
+								your rips
+							</td>
+						</tr><tr>
+							<td class="updates" id="user_rips_td">
+								<br>
+							</td>
+						</tr>
+					</table> <!-- End of 'ads' -->
+
+					<div class="spacer"></div>
+
+					<!-- News -->
+					<table class="page">
+						<tr>
+							<td class="title">
+								latest news
+							</td>
+						</tr><tr>
+							<td class="updates">
+								<div id="more_news_link">
+									<div class="date">October 13, 2013</div>
+									<ul>
+										<li> lots of small tweaks and fixes
+										<li> there's now a <a class="bold" href="/graphs">stats page</a> with graphs
+										<li> since the site started:
+										<ul>
+											<li> <b>500,000 albums ripped</b>
+											<li> 52 million page views
+											<li> 28 terabytes of bandwidth (130gb/day)
+										</ul>
+									</ul>
+									<div class="date">September 8, 2013</div>
+									<ul>
+										<li> site redesign
+									</ul>
+									<div class="date">August 25, 2013</div>
+									<ul>
+										<li> launched <a class="bold" href="./rips/">album viewer</a>
+									</ul>
+									<div class="date">August 18, 2013</div>
+									<ul>
+										<li> <b>300,000 albums ripped</b> since <a class="bold" href="https://github.com/4pr0n/rip/commit/64d108a10bec9bc7d69225e9628b4a72c4ea01a0" target="_BLANK">2013-04-19</a>
+										<li> 25 million page views
+										<li> 16 terabytes of bandwidth (100gb/day)
+									</ul>
+									<div class="date">August 3, 2013</div>
+									<ul>
+										<li> launched video ripper (beta)
+									</ul>
+									<div class="date">April 27, 2013</div>
+									<ul>
+										<li> source released <a class="bold" href="https://github.com/4pr0n/rip" target="_BLANK">on github</a>
+										<ul> <li> want support for a new site? <i>add it yourself using <b><a class="bold" href="https://github.com/4pr0n/rip/wiki/Supporting-a-new-site" target="_BLANK">this guide</a></b></i> </ul>
+									</ul>
+									<div class="date">March 6, 2013</div>
+									<ul>
+										<li> clicking 'rip &amp; zip' sets auto-loading URL
+										<ul>
+											<li> example: <a class="bold" href="/#imgur.com%2Fa%2FDU74E">rip.rarchives.com/#imgur.com%2Fa%2FDU74E</a>
+											<li> please link to this as <i>hotlinking</i> is now forbidden
+										</ul>
+									</ul>
+									<div class="center">
+										<a onclick="showMoreNews()" 
+											 class="pointer">
+												show all news
+										</a>
+									</div>
+								</div>
+								
+								<div id="more_news" class="not_displayed">
+									<div class="date">October 13, 2013</div>
+									<ul>
+										<li> lots of small tweaks and fixes
+										<li> there's now a <a class="bold" href="/graphs">stats page</a> with graphs
+										<li> since the site started:
+										<ul>
+											<li> <b>500,000 albums ripped</b>
+											<li> 52 million page views
+											<li> 28 terabytes of bandwidth (130gb/day)
+										</ul>
+									</ul>
+									<div class="date">September 8, 2013</div>
+									<ul>
+										<li> site redesign
+									</ul>
+									<div class="date">September 1, 2013</div>
+									<ul>
+										<li> added support for nfsfw
+									</ul>
+									<div class="date">August 30, 2013</div>
+									<ul>
+										<li> added support for setsdb
+									</ul>
+									<div class="date">August 25, 2013</div>
+									<ul>
+										<li> launched <a class="bold" href="./rips/">album viewer</a>
+									</ul>
+									<div class="date">August 22, 2013</div>
+									<ul>
+										<li> 4chan archive saves 'copy' of thread
+									</ul>
+									<div class="date">August 18, 2013</div>
+									<ul>
+										<li> added support for 8muses
+									</ul>
+									<div class="date">August 18, 2013</div>
+									<ul>
+										<li> <b>300,000 albums ripped</b> since <a class="bold" href="https://github.com/4pr0n/rip/commit/64d108a10bec9bc7d69225e9628b4a72c4ea01a0" target="_BLANK">2013-04-19</a>
+										<li> 25 million page views
+										<li> 16 terabytes of bandwidth (100gb/day)
+									</ul>
+									<div class="date">August 11, 2013</div>
+									<ul>
+										<li> added support for pbase
+									</ul>
+									<div class="date">August 10, 2013</div>
+									<ul>
+										<li> added support for kodiefiles.nl
+										<li> fixed 500px ripper (again)
+									</ul>
+									<div class="date">August 9, 2013</div>
+									<ul>
+										<li> fixed minus guest album ripper
+									</ul>
+									<div class="date">August 8, 2013</div>
+									<ul>
+										<li> added support for fapdu
+										<li> added support for fuskator
+									</ul>
+									<div class="date">August 7, 2013</div>
+									<ul>
+										<li> added support for redtube videos
+									</ul>
+									<div class="date">August 3, 2013</div>
+									<ul>
+										<li> launched video ripper
+										<li> added support for gallerydump (sort of)
+									</ul>
+									<div class="date">July 26, 2013</div>
+									<ul>
+										<li> added support for society.pichunter
+										<li> added support for imgur captions
+										<li> added support for imgbox
+										<li> added support for redditsluts.soup.io
+										<li> added support for reddit user accounts
+									</ul>
+									<div class="date">June 4, 2013</div>
+									<ul>
+										<li> added support for gonearchiving
+										<li> fixed photobucket ripper
+										<li> added support for flickr subalbums
+									</ul>
+									<div class="date">May 27, 2013</div>
+									<ul>
+										<li> flickr fix; grabs highest res images
+									</ul>
+									<div class="date">May 12, 2013</div>
+									<ul>
+										<li> added support for chansluts
+									</ul>
+									<div class="date">May 10, 2013</div>
+									<ul>
+										<li> fixed instagram/webstagram
+										<li> removed video URL support for motherless
+									</ul>
+									<div class="date">April 29, 2013</div>
+									<ul>
+										<li> added support for cghub, teenplanet
+									</ul>
+									<div class="date">April 27, 2013</div>
+									<ul>
+										<li> (attempted) fix for deviantart rips
+										<li> source released <a class="bold" href="https://github.com/4pr0n/rip" target="_BLANK">on github</a>
+										<ul> <li> want support for a new site? <i>create a new <a class="bold" href="https://github.com/4pr0n/rip/issues" target="_BLANK">issue</a></i> </ul>
+									</ul>
+									<div class="date">April 19, 2013</div>
+									<ul>
+										<li> added imgur subreddit support (e.g. http://imgur.com/r/pics)
+										<ul><li> capped at 500 pics, you maniacs</ul>
+										<li> added 500px and chickupload support
+									</ul>
+									<div class="date">March 22, 2013</div>
+									<ul>
+										<li> added gifyo support
+										<ul><li> buggy, doesn't grab full albums</ul>
+									</ul>
+									<div class="date">March 10, 2013</div>
+									<ul>
+										<li> 4 new domains (minus, motherless, 4chan, anonib)
+										<ul>
+											<li> motherless ripper does <i>not</i> rip videos
+											<li> video download URLs are saved to <i>videos.txt</i>
+										</ul>
+									</ul>
+									<div class="date">March 9, 2013</div>
+									<ul>
+										<li> added cap to number of images per rip (500) due to overuse
+										<li> imgur is the exception &amp; has no limit
+									</ul>
+									<div class="date">March 6, 2013</div>
+									<ul>
+										<li> version 2! you can still see the old version <a class="bold" href="v1/">here</a> (lol)
+										<li> clicking 'rip &amp; zip' sets auto-loading URL
+										<ul>
+											<li> example: <a class="bold" href="/#imgur.com%2Fa%2FDU74E">rip.rarchives.com/#imgur.com%2Fa%2FDU74E</a>
+											<li> please link to this as <i>hotlinking</i> is now forbidden
+										</ul>
+									</ul>
+									<div class="date">March 4, 2013</div>
+									<ul>
+										<li> added getgonewild
+									</ul>
+									<div class="date">February 27, 2013</div>
+									<ul>
+										<li> added instagram, tumblr, xhamster, imagearn
+									</ul>
+									<div class="date">February 25, 2013</div>
+									<ul>
+										<li> going public. supported sites:
+										<ul>
+											<li> imgur
+											<li> imagefap
+											<li> deviantart
+											<li> flickr
+											<li> photobucket
+											<li> imagebam
+											<li> twitter
+										</ul>
+									</ul>
+								</div>
+							</td>
+						</tr>
+					</table> <!-- End of 'news' -->
+					
+				</td>
+			</tr>
+		</table> <!-- end of 'mainpage' -->
+		
+		<table id="footer" width="100%"><tr>
+			<td class="left">
+				<div class="footer">
+					for questions, comments, or bug reports,<div class="small_spacer"></div>
+					contact 
+					<a class="box"
+						 href="http://www.reddit.com/message/compose/?to=4_pr0n&subject=about%20rip.rarchives.com&message=I%20have%20a%20%3Ccomplaint%2C%20comment%2C%20suggestion%3E%3A"
+						 target="_BLANK">4_pr0n</a>
+					via reddit
+				</div>
+			</td><td class="right">
+				<div class="footer">
+					for removal requests and serious reports,<div class="small_spacer"></div>
+					please email
+					<a class="box"
+						 href="mailto:admin@rarchives.com"
+						 target="_BLANK">admin at rarchives.com</a>
+				</div>
+			</td></tr>
+		</table>
+		
+		<div id="bottom_bar">
+			<table class="bottom">
+				<tr>
+					<td class="bottom">
+						<a class="bottom" href="./">ripper</a>
+					</td><td class="bottom">
+						<a class="bottom" href="./rips">albums</a>
+					</td><td class="bottom">
+						<a class="bottom" href="./graphs">stats</a>
+					</td><td class="bottom">
+						<a class="bottom" href="./about.html#about">about</a>
+					</td><td class="bottom">
+						<a class="bottom" href="./about.html#privacy">privacy</a>
+					</td><td class="bottom">
+						<a class="bottom" href="./about.html#terms_of_use">terms of use</a>
+					</td><td class="bottom">
+						<a class="bottom" href="./about.html#removals">removals</a>
+					</td><td class="bottom">
+						<a class="bottom" href="./about.html#contact">contact</a>
+					</td><td class="donate">
+						<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_BLANK">
+							<input type="hidden" name="cmd" value="_s-xclick">
+							<input type="hidden" name="hosted_button_id" value="KQ9SRHTVMAKSY">
+							<div class="donate_button">
+								<input type="submit" name="submit" value="">
+							</div>
+						</form>
+					</td>
+				</tr>
+			</table>
+		</div>
+		<br>
+		
+		<!-- Javascript warning -->
+		<noscript>
+			<div id="noscript" class="center">
+				<h1>warning</h1>
+				this site requires javascript to function correctly
+			</div>
+		</noscript>
+
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+		<script type="text/javascript" src="./js/rip.js"></script>
+	</body>
+</html>
+

@@ -34,8 +34,8 @@ class imagefap(basesite):
 
 	""" Discover directory path based on URL """
 	def get_dir(self, url):
-		#return 'imagefap_%s' % self.get_gid(url)
-		return 'IMAGEFAP' #% self.get_gid(url)
+		return 'imagefap_%s' % self.get_gid(url)
+		#return 'IMAGEFAP' #% self.get_gid(url)
 
 	def download(self):
 		self.init_dir()
@@ -44,6 +44,7 @@ class imagefap(basesite):
 		title = str(soup.title)
 		title = title[20:-8]
 		title = title.rstrip()
+		title = title.replace('\/', '_')
 		if ('(Page') in title:
 			title = title[:title.find('(')]
 		#title = self.web.between(r, 'Porn pics of ', '[(<\(]')

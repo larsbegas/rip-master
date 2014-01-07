@@ -53,7 +53,7 @@ class basesite(object):
 		if not os.path.exists(self.base_dir):
 			os.mkdir(self.base_dir)
 		self.original_url = url
-		self.debug('url:' + url)
+		#self.debug('url:' + url)
 		self.url = self.sanitize_url(url)
 		# Directory to store images in
 		self.working_dir  = '%s%s%s' % (self.base_dir, os.sep, self.get_dir(self.url))
@@ -128,13 +128,13 @@ class basesite(object):
 		
 		# nur in imgSRc !!!!!!
 		url = url.replace('http://b', 'http://o')  
-		
+		gallname = gallname.replace('\/', '_')
 		unique_saveas = True
 		if saveas == None:
 			unique_saveas = False
 			saveas = url[url.rfind('/')+1:]
 			if gallname != '':
-				saveas = gallname + '_' + saveas
+				saveas = gallname + '_' + saveas.replace('\/', '_')
 			self.debug('Pic:' + saveas)
 			
 			# Strip extraneous / non FS safe characters
@@ -255,8 +255,10 @@ class basesite(object):
 		Returns path to zip file
 	"""
 	def zip(self):
-		self.log('zipping album...')
-		zip_filename = '%s.zip' % self.working_dir
+		x = self.working_dir
+		x = x + "-" + self.get_dir(self.url) 
+		self.log('zipping album... %s ' % x)
+		zip_filename = '%s.zip' % x
 		z = ZipFile(zip_filename, "w", ZIP_DEFLATED)
 		for root, dirs, files in os.walk(self.working_dir):
 			if root.endswith('/thumbs'): continue # Do not zip thumbnails

@@ -1,4 +1,4 @@
-var MAX_USER_ALBUMS = 2000; // Maximum number of rips allowed per user
+var MAX_USER_ALBUMS = 20000; // Maximum number of rips allowed per user
 var TOS_VERSION = 1;
 var SUPPORTED_VIDEO_SITES = [
 	'vimeo.com', 'dailymotion.com', 'tumblr.com', 'vine.co', 
@@ -8,7 +8,7 @@ var SUPPORTED_VIDEO_SITES = [
 	'xtube.com', 'youjizz.com', 'mobypicture.com', 'sexykarma.com',
 	'fapjacks.com', 'setsdb.org', 'spankbang.com', 'fapdu.com', 
 	'pornably.com', 'vporn.com', 'seenive.com', 'cliphunter.com',
-	'', 'spankwire.com', 'vk.com', '']
+	'', 'spankwire.com', 'vk.com', 'picsart.com']
 
 function init() { // Executes when DOM is ready
 	// alert('#)x')

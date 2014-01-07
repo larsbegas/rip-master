@@ -2,14 +2,15 @@
 
 # 'basesite.py' contains lots of functionality required for a ripper
 from basesite import basesite
+from bs4 import BeautifulSoup
 
 class seenive(basesite):
 
 	""" Verify [and alter] URL to an acceptable format """
 	def sanitize_url(self, url):
-		if not 'seenive.com/' in url:
+		if not 'seenive.com' in url:
 			raise Exception('')
-		if not 'seenive.com/u/' in url:
+		if not 'seenive.com/u' in url:
 			raise Exception('required seenive.com/u/ not found in URL')
 		if '#' in url: url = url[:url.find('#')]
 		if '?' in url: url = url[:url.find('?')]
@@ -19,20 +20,31 @@ class seenive(basesite):
 			raise Exception('required format: seenive.com/u/<userid>')
 		if len(fields) > 3:
 			fields = fields[:3]
-		return 'http://%s' % '/'.join(fields)
-
+		asd = 'http://%s' % '/'.join(fields)
+		#raise Exception(asd)
+		return asd
+		
 	""" Discover directory path based on URL """
 	def get_dir(self, url):
 		return 'seenive_%s' % url[url.rfind('/')+1:]
 
 	""" Download images in album """
 	def download(self):
+		self.debug('i1')
 		self.init_dir()
 		r = self.web.get(self.url)
+		#self.debug(r)
 		total = index = 0
 		while True:
-			links = self.web.between(r, 'data-video-url="', '"')
-			if len(links) == 0: break
+			s = BeautifulSoup(r)
+			links = s.findAll('a', href=lambda x: x and x.startswith('/v/'))
+			links = s.findAll('source')
+			self.debug(links)
+			exit()
+			#links = self.web.between(r, 'data-video-url="', '"')
+			#self.debug(links)
+			if len(links) == 0: 
+				break
 			total += len(links)
 			for link in links:
 				index += 1

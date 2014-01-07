@@ -7,7 +7,7 @@ import cgitb; cgitb.enable() # for debugging
 import cgi # for getting query keys/values
 
 from sys    import argv, stdout
-from os     import remove, path, stat, utime, SEEK_END, sep, walk, environ, listdir
+from os     import remove, path, stat, utime, SEEK_END, sep, walk, environ, listdir #, rename
 from shutil import rmtree
 from stat   import ST_ATIME, ST_MTIME
 from time   import strftime
@@ -20,8 +20,6 @@ from sites.site_imagearn    import    imagearn
 from sites.site_imagebam   	 import    imagebam
 from sites.site_imagefap    import    imagefap
 from sites.site_imgur       import       imgur
-from sites.site_webstagram  import   webstagram
-from sites.site_statigram   import   statigram
 from sites.site_instagram   import   instagram
 from sites.site_photobucket import photobucket
 from sites.site_tumblr      import      tumblr
@@ -55,7 +53,10 @@ from sites.site_nfsfw       import       nfsfw
 from sites.site_shareimage  import  shareimage
 from sites.site_seenive     import     seenive
 from sites.site_vinebox     import     vinebox
+from sites.site_webstagram  import   webstagram
+from sites.site_statigram   import   statigram
 from sites.site_imgchili    import    imgchili
+from sites.site_picsart     import   picsart
 # No longer supported
 from sites.site_occ         import         occ
 from sites.site_gonearch    import    gonearch
@@ -74,8 +75,7 @@ def main():
 	# The dict would be { url : http://x.com, start: true, cached: false }
 	keys = get_keys()
 	if  'start' in keys and \
-			'url'   in keys:
-		
+			'url'   in keys:		
 		cached    = True # Default to cached
 		if 'cached' in keys and keys['cached'] == 'false':
 			cached = False
@@ -111,6 +111,7 @@ def rip(url, cached):
 		print_error(str(e))
 		return
 
+	'''
 	# Check URL against blacklist
 	if path.exists('url_blacklist.txt'):
 		for line in open('url_blacklist.txt', 'r'):
@@ -120,11 +121,15 @@ def rip(url, cached):
 			   ripper.working_dir.lower().endswith(line):
 				print_error('cannot rip: URL is blacklisted')
 				return
-
+	'''
+	
+	
 	# Check if there's already a zip for the album
 	if ripper.existing_zip_path() != None:
 		if not cached:
+			
 			# If user specified the uncached version, remove the zip
+			#self.debug ('REMOVING****: %s' % ripper.existing_zip_path())
 			remove(ripper.existing_zip_path())
 			if path.exists(ripper.working_dir):
 				rmtree(ripper.working_dir)
@@ -165,10 +170,13 @@ def rip(url, cached):
 		print_error('unable to download album (empty? 404?)')
 		return
 	
+	'''
 	# Save IP of ripper
 	f = open('%s%sip.txt' % (ripper.working_dir, sep), 'w')
 	f.write(environ.get('REMOTE_ADDR', '127.0.0.1'))
 	f.close()
+	'''
+	
 	
 	response = {}
 	response['image_count'] = ripper.image_count
@@ -193,7 +201,7 @@ def rip(url, cached):
 	except: pass
 	
 	
-	# Mark album as completed
+	# Mark album as unsupported
 	f = open('%s%scomplete.txt' % (ripper.working_dir, sep), 'w')
 	f.write('\n')
 	f.close()
@@ -205,6 +213,11 @@ def rip(url, cached):
 	
 	# Add to recently-downloaded list
 	add_recent(url)
+	
+	# MOVE mk1
+	#try:
+	#	rename(ripper.working_dir, '../__MOVE/' + ripper.working_dir)
+	#except Exception, e: print dumps(e)
 	
 	# Print it
 	print dumps(response)
@@ -255,7 +268,7 @@ def check(url):
 	try:
 		ripper = get_ripper(url)
 	except Exception, e:
-		print_error(str(e))
+		print_error('check: cant get ripper' + str(e))
 		return
 
 	# Check if there's already a zip for the album
@@ -327,6 +340,9 @@ def get_ripper(url):
 			shareimage,  \
 			seenive,     \
 			vinebox,     \
+			webstagram,  \
+			statigram,  \
+			picsart,  \
 			imgchili]
 	for site in sites:
 		try:
@@ -335,7 +351,8 @@ def get_ripper(url):
 		except Exception, e:
 			# Rippers that aren't made for the URL throw blank Exception
 			error = str(e)
-			if error == '': continue
+			if error == '': 
+				continue
 			# If Exception isn't blank, then it's the right ripper but an error occurred
 			raise e
 	raise Exception('Ripper can not rip given URL')
@@ -380,7 +397,7 @@ def recent(lines):
 		d['url'] = rec
 		d['view_url'] = ripper.working_dir.replace('rips/', 'rips/#')
 		result.append(d)
-		
+
 	print dumps( { 
 		'recent' : result
 		} )

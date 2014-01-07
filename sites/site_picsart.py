@@ -37,13 +37,13 @@ class picsart(basesite):
 	def sanitize_url(self, url):
 		# If this site isn't in the URL, pass an empty exception
 		# This tells the main script to move onto the next ripper
-		if not 'picsart.com/' in url:
+		if not '.picsart.com' in url:
 			raise Exception('')
 		
 		# If this ripper requires a specific URL, ensure we have that.
 		# Ex: We might require the URL contains "?galleryid=" or something like that
-		if not '/something/' in url:
-			raise Exception('required /something/ not found in URL')
+		#if not '/something/' in url:
+		#	raise Exception('required /something/ not found in URL')
 
 		# Strip hashtags and query strings from URL
 		# Ex: http://site.com/galleryid#image becomes http://site.com/galleryid
@@ -65,10 +65,10 @@ class picsart(basesite):
 		# 012345 is a unique album id, it's specific to one album
 		
 		# Get gallery ID after the last / in the URL
-		galleryid = url[url.rfind('/')+1:]
+		galleryid = url[7:url.rfind('.')]
 		
 		# Return the site prefix + the unique gallery name
-		return 'testsite_%s' % galleryid
+		return 'picsart_%s' % galleryid
 
 
 	""" Download images in album """

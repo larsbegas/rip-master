@@ -17,6 +17,11 @@ class webstagram(basesite):
 			user = url[url.find('.com/')+len('.com/'):]
 			if '/' in user: user = user[:user.find('/')]
 			url = 'http://web.stagram.com/n/%s' % user
+		elif 'pinsta.me/' in url:
+			# Convert to web.stagram
+			user = url[url.find('.me/')+len('.me/'):]
+			if '/' in user: user = user[:user.find('/')]
+			url = 'http://web.stagram.com/n/%s' % user
 		else:
 			raise Exception('')
 		if '?' in url: url = url[:url.find('?')]
@@ -33,7 +38,7 @@ class webstagram(basesite):
 		self.init_dir()
 		r = self.web.get(self.url)
 		totals = self.web.between(r, 'font-size:123.1%;">', '<')
-		if len(totals) > 0: total = int(totals[1])
+		if len(totals) > 0: total = int(totals[-1])
 		else: total = -1
 		index = 0
 		while True:

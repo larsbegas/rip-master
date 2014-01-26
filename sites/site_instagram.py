@@ -27,7 +27,7 @@ class instagram(basesite):
 		if'instagram.com/' in url:
 			# Legit
 			pass
-		elif 'web.stagram.com/n/' in url:
+		elif 'XXXXXXweb.stagram.com/n/' in url:
 			# Convert to web.stagram
 			user = url[url.find('.com/n/')+len('.com/n/'):]
 			if '/' in user: user = user[:user.find('/')]

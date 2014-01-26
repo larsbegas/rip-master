@@ -14,7 +14,7 @@ from time   import strftime
 from urllib import unquote
 from json   import dumps
 
-from sites.site_deviantart  import  deviantart 
+from sites.site_deviantart  import  deviantart
 from sites.site_flickr      import      flickr
 from sites.site_imagearn    import    imagearn
 from sites.site_imagebam   	 import    imagebam
@@ -56,7 +56,7 @@ from sites.site_vinebox     import     vinebox
 from sites.site_webstagram  import   webstagram
 from sites.site_statigram   import   statigram
 from sites.site_imgchili    import    imgchili
-from sites.site_picsart     import   picsart
+from sites.site_picsart     import    picsart
 # No longer supported
 from sites.site_occ         import         occ
 from sites.site_gonearch    import    gonearch
@@ -75,16 +75,16 @@ def main():
 	# The dict would be { url : http://x.com, start: true, cached: false }
 	keys = get_keys()
 	if  'start' in keys and \
-			'url'   in keys:		
+			'url'   in keys:
 		cached    = True # Default to cached
 		if 'cached' in keys and keys['cached'] == 'false':
 			cached = False
 		rip(keys['url'], cached)
-		
+
 	elif 'check' in keys and \
 			 'url'   in keys:
 		check(keys['url'])
-		
+
 	elif 'recent' in keys:
 		lines = 10
 		if 'lines' in keys:
@@ -94,7 +94,7 @@ def main():
 		ip = keys['byuser']
 		if ip == 'me': ip = environ.get('REMOTE_ADDR', '127.0.0.1')
 		print dumps({ 'albums' : albums_by_ip(ip) })
-	
+
 	else:
 		print_error('invalid request')
 
@@ -122,12 +122,12 @@ def rip(url, cached):
 				print_error('cannot rip: URL is blacklisted')
 				return
 	'''
-	
-	
+
+
 	# Check if there's already a zip for the album
 	if ripper.existing_zip_path() != None:
 		if not cached:
-			
+
 			# If user specified the uncached version, remove the zip
 			#self.debug ('REMOVING****: %s' % ripper.existing_zip_path())
 			remove(ripper.existing_zip_path())
@@ -148,13 +148,13 @@ def rip(url, cached):
 					for f in files:
 						if f.endswith('.txt'): continue
 						image_count += 1
-							
+
 				response['album'] = ripper.working_dir.replace('rips/', '').replace('%20', '%2520')
 				response['url']   = './%s' % ripper.working_dir.replace('rips/', 'rips/#')
 				response['image_count'] = image_count
 			print dumps( response )
 			return
-	
+
 	if is_contributor():
 		ripper.max_images = MAX_IMAGES_PER_CONTRIBUTOR
 	# Rip it
@@ -169,21 +169,21 @@ def rip(url, cached):
 	if not path.exists(ripper.working_dir):
 		print_error('unable to download album (empty? 404?)')
 		return
-	
+
 	'''
 	# Save IP of ripper
 	f = open('%s%sip.txt' % (ripper.working_dir, sep), 'w')
 	f.write(environ.get('REMOTE_ADDR', '127.0.0.1'))
 	f.close()
 	'''
-	
-	
+
+
 	response = {}
 	response['image_count'] = ripper.image_count
 	if ripper.hit_image_limit():
 		response['limit'] = ripper.max_images
-	
-	
+
+
 	# Create zip flag
 	f = open('%s%szipping.txt' % (ripper.working_dir, sep), 'w')
 	f.write('\n')
@@ -195,32 +195,51 @@ def rip(url, cached):
 	except Exception, e:
 		print_error('zip failed: %s' % str(e))
 		return
-	
+
 	# Delete zip flag
 	try: remove('%s%szipping.txt' % (ripper.working_dir, sep))
 	except: pass
-	
-	
+
+
 	# Mark album as unsupported
 	f = open('%s%scomplete.txt' % (ripper.working_dir, sep), 'w')
 	f.write('\n')
 	f.close()
 	response['album'] = ripper.working_dir.replace(' ', '%20').replace('%20', '%2520')
 	response['url']   = './%s' % ripper.working_dir.replace('rips/', 'rips/#')
-	
+
 	response['zip']  = 'NOZIP' #ripper.existing_zip_path().replace(' ', '%20').replace('%20', '%2520')
 	response['size'] = 'NOSIZE' ##ripper.get_size(ripper.existing_zip_path())
-	
+
 	# Add to recently-downloaded list
 	add_recent(url)
-	
+
 	# MOVE mk1
-	#try:
-	#	rename(ripper.working_dir, '../__MOVE/' + ripper.working_dir)
-	#except Exception, e: print dumps(e)
-	
+	try:
+		dssst = os.getcwd() + '../__MOVE/' + ripper.working_dir
+		self.log('moving to: %s' % dssst)
+		mk1move(ripper.working_dir, dssst)
+		#rename(ripper.working_dir, '../__MOVE/' + ripper.working_dir)
+	except Exception, e: print dumps(e)
+
 	# Print it
 	print dumps(response)
+
+def mk1move(src, dst):
+	root_src_dir = src
+	root_dst_dir = dst
+
+	for src_dir, dirs, files in os.walk(root_src_dir):
+		dst_dir = src_dir.replace(root_src_dir, root_dst_dir)
+		if not os.path.exists(dst_dir):
+			os.mkdir(dst_dir)
+		for file_ in files:
+			src_file = os.path.join(src_dir, file_)
+			dst_file = os.path.join(dst_dir, file_)
+			if os.path.exists(dst_file):
+				os.remove(dst_file)
+			shutil.move(src_file, dst_dir)
+	return dst;
 
 """ Checks if current user is a 'contributor' """
 def is_contributor():
@@ -285,7 +304,7 @@ def check(url):
 				for f in files:
 					if f.endswith('.txt'): continue
 					image_count += 1
-						
+
 			response['album'] = ripper.working_dir.replace('rips/', '').replace('%20', '%2520')
 			response['url']   = './%s' % ripper.working_dir.replace('rips/', 'rips/#')
 			response['image_count'] = image_count
@@ -293,7 +312,7 @@ def check(url):
 	else:
 		# Print last log line ("status")
 		lines = ripper.get_log(tail_lines=1)
-		print dumps( { 
+		print dumps( {
 			'log' : '\\n'.join(lines)
 			} )
 
@@ -351,7 +370,7 @@ def get_ripper(url):
 		except Exception, e:
 			# Rippers that aren't made for the URL throw blank Exception
 			error = str(e)
-			if error == '': 
+			if error == '':
 				continue
 			# If Exception isn't blank, then it's the right ripper but an error occurred
 			raise e
@@ -388,7 +407,7 @@ def recent(lines):
 		recents = tail(f, lines=lines)
 		f.close()
 	except: pass
-	
+
 	result = []
 	for rec in recents:
 		d = {}
@@ -398,7 +417,7 @@ def recent(lines):
 		d['view_url'] = ripper.working_dir.replace('rips/', 'rips/#')
 		result.append(d)
 
-	print dumps( { 
+	print dumps( {
 		'recent' : result
 		} )
 
@@ -429,7 +448,7 @@ def add_recent(url):
 		if url in tail(f, lines=10): already_added = True
 		f.close()
 		if already_added: return
-	
+
 	f = open('recent_rips.lst', 'a')
 	f.write('%s\n' % url)
 	f.close()
@@ -457,7 +476,7 @@ def albums_by_ip(ip):
 					url = lines[0]
 					url = url[url.rfind(' ')+1:]
 				jsonalbum['url']   = url
-					
+
 			albums.append(jsonalbum)
 	return albums
 

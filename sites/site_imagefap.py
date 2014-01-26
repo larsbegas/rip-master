@@ -24,7 +24,7 @@ class imagefap(basesite):
 	""" Extract gallery id from URL. Return empty string if not found """
 	def get_gid(self, url):
 		gid = ''
-		for before in ['?gid=', '/pictures/','/gallery/']:
+		for before in ['?gid=','&gid=', '/pictures/','/gallery/']:
 			if before in url:
 				gid = url[url.rfind(before)+len(before):]
 		for c in ['/', '?', '#', '&']:
@@ -44,17 +44,19 @@ class imagefap(basesite):
 		title = str(soup.title)
 		title = title[20:-8]
 		title = title.rstrip()
-		title = title.replace('\/', '_')
+		title = title.replace('\/', '_').replace('/','_').replace('\\','_').replace('@','[AT]')
 		if ('(Page') in title:
 			title = title[:title.find('(')]
 		#title = self.web.between(r, 'Porn pics of ', '[(<\(]')
 		user = self.web.between(r, 'Uploaded by ', '<')
-		username = user.pop()
-		
+		if len(user)>0:
+			username = user.pop()
+		else:
+			username = 'DEFAULT'
 		r = r[r.find('showMoreGalleries'):] # To ignore user icon
 		links = self.web.between(r, 'fap.to/images/thumb/', '"')
 		self.debug('title:%s' % title)
-		self.debug('user:%s' % username)		
+		self.debug('user:%s' % username)
 		
 		for (index, link) in enumerate(links):
 			pid = link[7:-4]

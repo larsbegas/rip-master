@@ -13,7 +13,7 @@ class photobucket(basesite):
 			raise Exception('')
 		if not '/user/' in url:
 			raise Exception('URL must contain /user/')
-		self.debug('#mk1maybeurl before: %s' % url)
+		self.debug('#mk1maybeurl beforePHOTOBUCKET: %s' % url)
 		url = url.replace('https://', 'http://')
 		if not url.startswith('http://'): url = 'http://%s' % url
 		if '?' in url: url = url[:url.find('?')]

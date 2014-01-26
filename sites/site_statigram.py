@@ -11,10 +11,10 @@ class statigram(basesite):
 	
 	""" Parse/strip URL to acceptable format """
 	def sanitize_url(self, url):
-		if'instagram.com/' in url:
+		if'____instagram.com/' in url:
 			# Legit
 			pass
-		elif 'web.stagram.com/n/' in url:
+		elif '___web.stagram.com/n/' in url:
 			# Convert to instagram
 			user = url[url.find('.com/n/')+len('.com/n/'):]
 			if '/' in user: user = user[:user.find('/')]
@@ -24,13 +24,15 @@ class statigram(basesite):
 			user = url[url.find('gr.am/')+len('gr.am/'):]
 			if '/' in user: user = user[:user.find('/')]
 			url = 'http://instagram.com/%s' % user
-			
+			self.debug('stati sani url121212:%s' % url)
+		
 		else:
 			raise Exception('')
 		url = url.replace('instagram.com/', 'statigr.am/')
-		if '?' in url: url = url[:url.find('?')]
-		if '#' in url: url = url[:url.find('#')]
+		#if '?' in url: url = url[:url.find('?')]
+		#if '#' in url: url = url[:url.find('#')]
 		while url.endswith('/'): url = url[:-1]
+		self.debug('stati sani returns: %s' % url)
 		return url
 
 	""" Discover directory path based on URL """

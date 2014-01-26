@@ -20,9 +20,10 @@ class imgur(basesite):
 		#   "account": user.imgur.com/album_name
 		#   "subreddit": imgur.com/r/subreddit
 		self.album_type = None 
-		self.debug('url before: %s' % url)
 		if not 'http://imgur.com' in url and not '.imgur.com' in url:
 			raise Exception('')
+		self.debug('url before(IMGUR_sanititzw): %s' % url)
+		
 		if '/m.imgur.com/' in url: url = url.replace('/m.imgur.com/', '/imgur.com/')
 		if      '.imgur.com'    in url and \
 				not url.startswith('i.imgur.com') and \

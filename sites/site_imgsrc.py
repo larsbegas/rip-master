@@ -2,6 +2,7 @@
 
 from basesite import basesite
 from bs4 import BeautifulSoup
+import re
 
 class imgsrc(basesite):
 	
@@ -15,27 +16,29 @@ class imgsrc(basesite):
 			raise Exception('')
 		u = url
 		pwd = ''
-		#print 'Sanitizing URL: ' + u
-		#print 'self.original_url: ' + self.original_url
-		if '&pwd=' in self.original_url:
-			pwd = self.original_url[self.original_url.find('&')+5:]
-			#print "PWD: %s" % pwd
+		self.debug('Sanitizing URL: ' + u)
+		self.debug('self.original_url: ' + self.original_url)
+		if "pwd=" in self.original_url:
+			self.debug("pwd= in  %s" % self.original_url)
+			pwd = self.original_url[self.original_url.find('pwd')+4:]
+			self.imgsrcpwd = pwd
+			self.debug("PWD: %s" % pwd)
 		#print "1"
 		if '?' in u:
 			ad = u[u.find('?'):u.find('&')]
 			u = u[:u.find('?')]
-		#print '2'
+		self.debug('2')
 		u = u.replace('http://', '').replace('https://', '')
 		splits = u.split('/')
-		#print "len splits %s " % len(splits)
+		self.debug("len splits %s " % len(splits))
 		xxx = len(splits)
-		#print xxx
+		#self.debug(xxx)
+		self.debug( "********** %s" % " ".join(splits))
 		if xxx>2:
-			#print "********** %s" % "k".join(splits)
 			if  splits[2] == 'preword.php':
-				#print url
+				self.debug("splits[2] == 'preword.php' url4:%s" % url)
 				r = self.web.get(url)
-				#print '4:%s' % r
+				self.debug('4:%s' % r)
 				#print "getting preword: %s \n" % r
 				
 				r2 = self.web.between(r, 'rel=shortlink', '>')
@@ -47,13 +50,14 @@ class imgsrc(basesite):
 				#print "u2 %s \n" % u2
 				u3 = u2[7:-1]
 				#print " r2: %s  " % r2[-1]
-				#print ' u3: %s \n' % u3
+				self.debug(' u3: %s \n' % u3)
 				
 				return self.sanitize_url(u3)
 		
 		if ('0xs.ru' in splits):
-			#print "ajksbdakjsbdf\n\n\n"
-			return 'http://' + '/'.join(splits)
+			asd = 'http://' + '/'.join(splits)
+			self.debug("\n\n0xs.ru:%s\n\n"%asd)
+			return asd
 		if len(splits) != 3 or \
 				splits[1] == 'main' or \
 				splits[2] == 'pic.php' or \
@@ -63,46 +67,88 @@ class imgsrc(basesite):
 			elif (pwd != '') and (ad) :
 				return 'http://imgsrc.ru/main/pic_tape.php%s&pwd=%s' %  (ad, pwd)
 			elif splits[2] == 'pic_tape.php':
-				return 'http://imgsrc.ru/main/pic_tape.php%s' %  ad
+				return 'http://imgsrc.ru/main/pic_tape.php%s&pwd=%s' %  (ad, pwd)
 			raise Exception('invalid imgsrc url: expected <b>http://imgsrc.ru/&lt;user&gt;/&lt;album&gt;.html</b>')
-		return 'http://imgsrc.ru/%s/%s?%s' % (splits[1], splits[2], pwd)
+		finret = 'http://imgsrc.ru/%s/%s?pwd=%s' % (splits[1], splits[2], pwd)
+		self.debug('finret:%s'%finret)
+		return finret
 	
 	""" Discover directory path based on URL """
 	def get_dir(self, url):
 		splits = url.split('/')
-		#print splits
+		self.debug(splits)
 		#print '\n'
 		if '.' in splits[-1]: splits[-1] = splits[-1][:splits[-1].find('.')]
 		if splits[-2] == '0xs.ru':
-			return'imgsrc_%s' % (splits[-1])
-		return 'imgsrc_%s' % (splits[-2])
+			if self.username and (self.username != ''):
+				return 'imgsrc_%s' % self.username
+			else: return'imgsrc_%s' % (splits[-1])
+			
+		ret1 = (splits[-2])
+		self.debug("returning:%s"%ret1)
+		return 'imgsrc_%s' % ret1
 	
 	""" xxx """
-	def get_gallery_dir(self, url, r=''):
+	def get_gallery_dir(self, url, r='', gallno2=''):
 		splits = url.split('/')
-		if '.' in splits[-1]: splits[-1] = splits[-1][:splits[-1].find('.')]
-		gallno = splits[-1]
+		self.debug("get_gallery_dir")
+		self.debug(splits)
+		gallno="asdasd"
+		if 'pic_tape' in url:
+			gallno = splits[3]
+			self.debug("gallno = splits 3 :%s"%gallno)
+		elif '.' in splits[-1]:
+			splits[-1] = splits[-1][:splits[-1].find('.')]
+			gallno = splits[-1]
+		
+		
 		if r!='':
-			if 'preword' in gallno:
-				gallno =  self.web.between(r, 'href=/michi1000/','.html')[0]
+			gallnameArray = self.web.between(r, 'iMGSRC.RU</a> ','</td>')
+			self.debug('GallnameArray: %s' % gallnameArray)
+			
+			if 'preword' in url:
+				self.debug('preword gallno PRE: %s' % gallno)
+				#window.location='http://imgsrc.ru/marsattacks/22394697.html?pwd=';
+				#asdasd = self.web.between(r, "location=","html")
+				re2 = re.match(r'/\w+/([^\.]+)\.html\?pwd', r, re.M|re.I)
+				asdasd=""
+				if re2:
+					asdasd = re2.group(0)
+				
+				self.debug(asdasd)
+				if asdasd:
+					gallno =  asdasd
+				else:
+					self.debug(gallno2)
+					gallno = gallno2
+				
+				self.debug('preword gallno AFTER: %s' % gallno)
+				ret3 = gallno + " - " + gallnameArray[0] + " "
+				self.debug('returning3:%s'%ret3)
+				self.title = gallnameArray[0]
+				return ret3
 				#exit(gallno)
 			
-			gallnameArray = self.web.between(r, 'iMGSRC.RU</a> ','</td>')
-			#print 'GallnameArray: %s' % gallnameArray
-			#print '\n'
-			
-			return gallnameArray[0] + ' - ' + gallno + ''
-		return gallno
+			self.debug('sadsdsad4444')
+			ret1 = gallnameArray[0] + ' - ' + gallno + ' '
+			self.title = gallno
+			self.debug('returning1:%s'%ret1)
+			return ret1
+		
+		self.debug('sadsdsad2222')
+		self.debug('returning gallno2: %s'%gallno2)
+		self.title = gallno
+		return gallno2
 	
 	def verify_r(self, r):
-		#print "Verifiy?.. "
+		self.debug("Verifiy?.. ")
 		if "href='/main/warn.php" in r:
 			# Need to verify age
 			verify = self.web.between(r, "href='/main/warn.php", "'")[0]
 			verify = 'http://imgsrc.ru/main/warn.php%s' % verify
 			self.web.get(verify)
 			r = self.web.get(self.url)
-			#print "yea, verified"
+			self.debug("yea, verified")
 		
 		#if 'Please enter album\'s password' in r:
 			#self.wait_for_threads()
@@ -118,8 +164,13 @@ class imgsrc(basesite):
 			if link != None:
 				self.log('Continue to album: ' + link)
 				r = self.web.get(link.href)
-			else: self.debug("dasddasd	")
-		else: self.debug('no')
+			else: self.debug("link == None	")
+		else:
+			self.debug('no Contissssue o abum" idsnl:%s'%self.original_url )
+			if (self.imgsrcpwd != "") and ('pwd' not in r):
+				self.url = self.url + "&pwd=" + self.imgsrcpwd
+			r = self.web.get(self.url)
+		
 		
 		return r
 	
@@ -128,30 +179,32 @@ class imgsrc(basesite):
 		self.init_dir()
 		myurl = self.original_url
 		if pwd!='':
+			self.debug('pwd: %s' % pwd)
+			self.debug('imgsrcpwd:%s'%self.imgsrcpwd)
 			self.url = self.original_url
 			r = self.web.get(self.original_url)
-			#print "download() pwd set: url %s\n " % self.original_url
+			self.debug( "download() pwd set: url %s\n " % self.original_url)
 			r = self.verify_r(r)
-		
 		else:
+			self.debug('pwd is null')
 			r = self.web.get(self.url)
 			
 			r = self.verify_r(r)
-			
+			self.debug('veriefiedFIN')
 			# Load full-page gallery to save time
 			temp_url = self.web.between(r, "href='/main/pic_tape.php?ad=", '\'')[0] #was '&'
 			self.url = 'http://imgsrc.ru/main/pic_tape.php?ad=%s' % temp_url
-			#print "uuuuuu %s " % self.url
+			self.debug("URL: %s " % self.url)
 			r = self.web.get(self.url)
 		
-		if not "href='/main/pic_tape.php?ad=" in r and False:
-			#print "RRRR_: %s" % r
-			#exit()
+		if not "pic_tape.php" in self.url:
+			print "111 no pic_tape in : %s" % self.url
+			exit()
 			self.wait_for_threads()
 			raise Exception('could not find "view all images" link')
 		
 		
-		#print "RRRR: %s" % r
+		self.debug("rr: %s" % r)
 		
 		skip_amount = 12
 		current     = 0
@@ -159,35 +212,49 @@ class imgsrc(basesite):
 		img_total   = 0
 		
 		while True:
-			#print "while true: %s" % r
+			self.debug("while true:")
+			#self.debug("RRRR: %s" % r)
 			links = self.web.between(r, 'class="big" src=\'', "'")
+			self.debug("LINKS1:")
+			self.debug(links)
 			img_total += len(links)
 			
 			#print "LINKS"
 			#print links
 			
 			if len(links) <= 0:
-				#print r
 				exit(88)
+			
 			for link2 in links:
 				self.debug("UUUU2 liunk:%s" % link2)
+				splits2 = link2.split('/')
+				self.debug(splits2)
 				img_index += 1
 				saveas="U1-G1-"
+				gallname2=""
 				try:
-					saveas = link2[link2.rfind('/')+1:]
-					gallname2="";
-					if (not False):
+					if '.ru/m/' in link2:
+						
 						gallname2 = self.get_gallery_dir(myurl, r)
-					else: gallname2 = "USER-GALL-"
-					saveas = gallname2 + ' - ' + saveas
-					self.log('saveas: ' + saveas)
-				except: pass
+						saveas = splits2[4] + " - " + gallname2 + " "
+						self.debug('saveasYY: ' + saveas)
+					else:
+						saveas = link2[link2.rfind('/')+1:]
+						self.debug('saveasZZ: ' + saveas)
+						gallname2 = self.get_gallery_dir(myurl, r)
+						
+						saveas = gallname2 + ' - ' + saveas
+						self.debug('saveasXX: ' + saveas)
+				except Exception, e:
+					self.debug(e)
 				
 				if '?' in saveas: saveas = saveas[:saveas.find('?')]
+				saveas = saveas.replace('.','#')
 				if ':' in saveas: saveas = saveas[:saveas.find(':')]
+				self.debug('saveas2: ' + saveas)
 				self.download_image(link2, img_index, total=img_total, subdir='', saveas=saveas)
-				if self.hit_image_limit(): break
-			if self.hit_image_limit(): break
+				#if self.hit_image_limit(): break
+			#if self.hit_image_limit(): break
 			if '>next ' not in r: break
 			current += skip_amount
 			r = self.web.get('%s&way=&skp=%d&pwd=%s' % (self.url, current, pwd))

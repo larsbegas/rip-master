@@ -53,7 +53,14 @@ class basesite(object):
 		if not os.path.exists(self.base_dir):
 			os.mkdir(self.base_dir)
 		self.original_url = url
-		#self.debug('url:' + url)
+		#self.debug('class: %s' % self.__class__.__name__)
+		#self.debug('basesite.__init__ url:' + url)
+		self.imgsrcpwd = ""
+		self.username = ""
+		if 'pwd=' in url:
+			self.imgsrcpwd = url[url.find('pwd')+4:]
+			self.debug('self.imgsrcpwd:%s'%self.imgsrcpwd)
+		self.title=""
 		self.url = self.sanitize_url(url)
 		# Directory to store images in
 		self.working_dir  = '%s%s%s' % (self.base_dir, os.sep, self.get_dir(self.url))
@@ -64,7 +71,8 @@ class basesite(object):
 		self.logfile      = '%s%s%s' % (self.working_dir, os.sep, self.get_gallery_dir(self.url) + LOG_NAME)
 		self.first_log    = True
 		
-	def get_gallery_dir(self, url, r=''):
+		
+	def get_gallery_dir(self, url, r='', gallno2=''):
 		return ''
 
 	""" To be overridden """
@@ -128,7 +136,7 @@ class basesite(object):
 		
 		# nur in imgSRc !!!!!!
 		url = url.replace('http://b', 'http://o')  
-		gallname = gallname.replace('\/', '_')
+		gallname = gallname.replace('/', '_').replace('.', '_')
 		unique_saveas = True
 		if saveas == None:
 			unique_saveas = False
@@ -141,7 +149,7 @@ class basesite(object):
 			if '?' in saveas: saveas = saveas[:saveas.find('?')]
 			if ':' in saveas: saveas = saveas[:saveas.find(':')]
 		# Add a file extension if necessary
-		if not '.' in saveas:
+		if True: #or (not '.' in saveas):
 			m = self.web.get_meta(url)
 			ct = 'image/jpeg' # Default to jpg
 			if 'Content-Type' in m: ct = m['Content-Type']
@@ -213,8 +221,10 @@ class basesite(object):
 		Delete working dir if no images are downloaded
 	"""
 	def wait_for_threads(self):
-		while self.thread_count > 0:
+		i = 0
+		while (self.thread_count > 0) and (i < 1000):
 			time.sleep(0.1)
+			i = i + 1
 		if os.path.exists(self.working_dir):
 			if len(os.listdir(self.working_dir)) <= 1:
 				rmtree(self.working_dir) # Delete everything in working dir

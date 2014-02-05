@@ -10,7 +10,6 @@ recent_rips.lst
 sites/rips/
 sites/tumblr_api.key*
 sites/twitter_api.key*
-sites/test.py
 TODO
 log.cleanup
 *.txt

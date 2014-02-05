@@ -32,8 +32,8 @@ class imgsrc(basesite):
 		splits = u.split('/')
 		self.debug("len splits %s " % len(splits))
 		xxx = len(splits)
-		#self.debug(xxx)
-		self.debug( "********** %s" % " ".join(splits))
+		self.debug(xxx)
+		self.debug("** %s **" % " ".join(splits))
 		if xxx>2:
 			if  splits[2] == 'preword.php':
 				self.debug("splits[2] == 'preword.php' url4:%s" % url)
@@ -42,21 +42,29 @@ class imgsrc(basesite):
 				#print "getting preword: %s \n" % r
 				
 				r2 = self.web.between(r, 'rel=shortlink', '>')
+				r2b = self.web.between(r, '0xs.ru/', '\'')
 				#print 5
-				#print "r2: %s " % r2
+				self.debug("r2: %s " % r2)
+				self.debug("r2b: %s " % r2b)
 				#assert(len(r2) > 0)
 				u2 = r2[-1]
 				#assert(len(u2) > 0)
 				#print "u2 %s \n" % u2
 				u3 = u2[7:-1]
 				#print " r2: %s  " % r2[-1]
+				if self.imgsrcpwd != '':
+					u3 = u3 + '?pwd=' + self.imgsrcpwd
 				self.debug(' u3: %s \n' % u3)
 				
 				return self.sanitize_url(u3)
 		
 		if ('0xs.ru' in splits):
 			asd = 'http://' + '/'.join(splits)
-			self.debug("\n\n0xs.ru:%s\n\n"%asd)
+			self.debug("\n0xs.ru 1:%s\n\n"%asd)
+			if self.imgsrcpwd and self.imgsrcpwd != '':
+				asd = asd + '?pwd=' + self.imgsrcpwd
+			
+			self.debug("\n\n0xs.ru 2:%s\n\n"%asd)
 			return asd
 		if len(splits) != 3 or \
 				splits[1] == 'main' or \
@@ -135,7 +143,7 @@ class imgsrc(basesite):
 			self.debug('returning1:%s'%ret1)
 			return ret1
 		
-		self.debug('sadsdsad2222')
+		self.debug('sadsdsaqqd2222')
 		self.debug('returning gallno2: %s'%gallno2)
 		self.title = gallno
 		return gallno2
@@ -166,45 +174,52 @@ class imgsrc(basesite):
 				r = self.web.get(link.href)
 			else: self.debug("link == None	")
 		else:
-			self.debug('no Contissssue o abum" idsnl:%s'%self.original_url )
 			if (self.imgsrcpwd != "") and ('pwd' not in r):
 				self.url = self.url + "&pwd=" + self.imgsrcpwd
+			self.debug('VERIFY: no CONTINUE or main warn found continue to:%s'%self.url )
 			r = self.web.get(self.url)
+			#exit(r)
 		
 		
 		return r
-	
+
 	def download(self, pwd=''):
-		self.debug("Start dling")
+		#self.debug("Start pre init")
 		self.init_dir()
+		#self.debug("Start post init")
 		myurl = self.original_url
 		if pwd!='':
-			self.debug('pwd: %s' % pwd)
-			self.debug('imgsrcpwd:%s'%self.imgsrcpwd)
 			self.url = self.original_url
 			r = self.web.get(self.original_url)
-			self.debug( "download() pwd set: url %s\n " % self.original_url)
 			r = self.verify_r(r)
 		else:
-			self.debug('pwd is null')
 			r = self.web.get(self.url)
 			
 			r = self.verify_r(r)
-			self.debug('veriefiedFIN')
 			# Load full-page gallery to save time
-			temp_url = self.web.between(r, "href='/main/pic_tape.php?ad=", '\'')[0] #was '&'
+
+			atemp_url = self.web.between(r, "href='/main/pic_tape.php?ad=", '\'')[0]
+			if atemp_url.endswith('&pwd='):
+				atemp_url = atemp_url[:atemp_url.find('&')]
+			self.debug("atemp: %s " % atemp_url)
+			
+			temp_url = "HHHHHHHH"
+			if atemp_url:
+				if isinstance(atemp_url, list):
+					temp_url = atemp_url[0]
+				else: temp_url = atemp_url
+			else: raise Exception("pictape fehlt wohl sieh hier")
 			self.url = 'http://imgsrc.ru/main/pic_tape.php?ad=%s' % temp_url
-			self.debug("URL: %s " % self.url)
+			self.debug("end download() self.url: %s " % self.url)
 			r = self.web.get(self.url)
 		
 		if not "pic_tape.php" in self.url:
-			print "111 no pic_tape in : %s" % self.url
-			exit()
+			print 'could not find pic_tape.php in %s' % self.url
 			self.wait_for_threads()
-			raise Exception('could not find "view all images" link')
+			raise Exception('could not find pic_tape.php in %s' % self.url)
 		
 		
-		self.debug("rr: %s" % r)
+		#self.debug("rr: %s" % r)
 		
 		skip_amount = 12
 		current     = 0
@@ -223,7 +238,7 @@ class imgsrc(basesite):
 			#print links
 			
 			if len(links) <= 0:
-				exit(88)
+				raise Exception("88")
 			
 			for link2 in links:
 				self.debug("UUUU2 liunk:%s" % link2)
@@ -249,9 +264,9 @@ class imgsrc(basesite):
 					self.debug(e)
 				
 				if '?' in saveas: saveas = saveas[:saveas.find('?')]
-				saveas = saveas.replace('.','#')
-				if ':' in saveas: saveas = saveas[:saveas.find(':')]
-				self.debug('saveas2: ' + saveas)
+				saveas = re.sub('[.!/#:]', '', saveas)
+				self.debug('now base->down saveas:%s link2:%s gallname2:%s ' \
+					% (saveas, link2, gallname2))
 				self.download_image(link2, img_index, total=img_total, subdir='', saveas=saveas)
 				#if self.hit_image_limit(): break
 			#if self.hit_image_limit(): break

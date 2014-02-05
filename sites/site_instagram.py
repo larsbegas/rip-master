@@ -48,6 +48,7 @@ class instagram(basesite):
 		self.init_dir()
 		client_id = self.get_api_key()
 		baseurl = '%s/media?client_id=%s' % (self.url, client_id)
+		self.debug('baseurl:%s' % baseurl)
 		url = baseurl
 		index = 0
 		while True:
@@ -63,6 +64,7 @@ class instagram(basesite):
 				self.log('status NOT OK: %s' % json['status'])
 				raise Exception('status not "ok": %s' % json['status'])
 			last_id = 0
+			self.debug(json)
 			for item in json['items']:
 				last_id = item['id']
 				for media_type in ['videos', 'images']:

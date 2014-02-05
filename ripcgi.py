@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
-MAX_ALBUMS_PER_USER = 20000000
-MAX_IMAGES_PER_CONTRIBUTOR = 10000000999999
+MAX_ALBUMS_PER_USER = 2000
+MAX_IMAGES_PER_CONTRIBUTOR = 10000000
 
 import cgitb; cgitb.enable() # for debugging
 import cgi # for getting query keys/values
@@ -80,11 +80,11 @@ def main():
 		if 'cached' in keys and keys['cached'] == 'false':
 			cached = False
 		rip(keys['url'], cached)
-	
+
 	elif 'check' in keys and \
 			 'url'   in keys:
 		check(keys['url'])
-	
+
 	elif 'recent' in keys:
 		lines = 10
 		if 'lines' in keys:
@@ -94,17 +94,16 @@ def main():
 		ip = keys['byuser']
 		if ip == 'me': ip = environ.get('REMOTE_ADDR', '127.0.0.1')
 		print dumps({ 'albums' : albums_by_ip(ip) })
-	
+
 	else:
 		print_error('invalid request')
-		return
 
 """ Gets ripper, checks for existing rip, rips and zips as needed. """
 def rip(url, cached):
 	url = unquote(url.strip()).replace(' ', '%20').replace('https://', 'http://')
-	
+
 	if not passes_pre_rip_check(url): return
-	
+
 	try:
 		# Get domain-specific ripper for URL
 		ripper = get_ripper(url)
@@ -113,11 +112,11 @@ def rip(url, cached):
 		return
 
 
-	
+
 	# Check if there's already a zip for the album
 	if ripper.existing_zip_path() != None:
 		if not cached:
-			
+
 			# If user specified the uncached version, remove the zip
 			#self.debug ('REMOVING****: %s' % ripper.existing_zip_path())
 			remove(ripper.existing_zip_path())
@@ -138,13 +137,13 @@ def rip(url, cached):
 					for f in files:
 						if f.endswith('.txt'): continue
 						image_count += 1
-				
+
 				response['album'] = ripper.working_dir.replace('rips/', '').replace('%20', '%2520')
 				response['url']   = './%s' % ripper.working_dir.replace('rips/', 'rips/#')
 				response['image_count'] = image_count
 			print dumps( response )
 			return
-	
+
 	if is_contributor():
 		ripper.max_images = MAX_IMAGES_PER_CONTRIBUTOR
 	# Rip it
@@ -154,49 +153,49 @@ def rip(url, cached):
 	except Exception, e:
 		print_error('download failed_xx1: %s' % str(e))
 		return
-	
+
 	# If ripper fails silently, it will remove the directory of images
 	if not path.exists(ripper.working_dir):
 		print_error('unable to download album (empty? 404?)')
 		return
-	
+
 	response = {}
 	response['image_count'] = ripper.image_count
 	if ripper.hit_image_limit():
 		response['limit'] = ripper.max_images
 
-	
+
 	# Create zip flag
 	f = open('%s%szipping.txt' % (ripper.working_dir, sep), 'w')
 	f.write('\n')
 	f.close()
-	
+
 	# Zip it
 	try:
 		ripper.zip()
 	except Exception, e:
 		print_error('zip failed: %s' % str(e))
 		return
-	
+
 	# Delete zip flag
 	try: remove('%s%szipping.txt' % (ripper.working_dir, sep))
 	except: pass
 
-	
+
 	# Mark album as unsupported
 	f = open('%s%scomplete.txt' % (ripper.working_dir, sep), 'w')
 	f.write('\n')
 	f.close()
 	response['album'] = ripper.working_dir.replace(' ', '%20').replace('%20', '%2520')
 	response['url']   = './%s' % ripper.working_dir.replace('rips/', 'rips/#')
-	
+
 	response['zip']  = 'NOZIP' #ripper.existing_zip_path().replace(' ', '%20').replace('%20', '%2520')
 	response['size'] = 'NOSIZE' ##ripper.get_size(ripper.existing_zip_path())
-	
+
 	#self.log('adding to recent')
 	# Add to recently-downloaded list
 	add_recent(url)
-	
+
 	#self.log('try move')
 	# MOVE mk1
 	try:
@@ -210,7 +209,7 @@ def rip(url, cached):
 		#x = 'moo' + x
 		#print_error(x)
 		#return
-	
+
 	# Print it
 	print dumps(response)
 	return
@@ -218,7 +217,7 @@ def rip(url, cached):
 def mk1move(src, dst):
 	root_src_dir = src
 	root_dst_dir = dst
-	
+
 	for src_dir, dirs, files in os.walk(root_src_dir):
 		dst_dir = src_dir.replace(root_src_dir, root_dst_dir)
 		if not os.path.exists(dst_dir):
@@ -273,13 +272,13 @@ def passes_pre_rip_check(url):
 """
 def check(url):
 	url = unquote(url).replace(' ', '%20')
-	
+
 	try:
 		ripper = get_ripper(url)
 	except Exception, e:
 		print_error('check: cant get ripper' + str(e))
 		return
-	
+
 	# Check if there's already a zip for the album
 	if ripper.existing_zip_path() != None:
 		response = {}
@@ -294,7 +293,7 @@ def check(url):
 				for f in files:
 					if f.endswith('.txt'): continue
 					image_count += 1
-			
+
 			response['album'] = ripper.working_dir.replace('rips/', '').replace('%20', '%2520')
 			response['url']   = './%s' % ripper.working_dir.replace('rips/', 'rips/#')
 			response['image_count'] = image_count
@@ -397,7 +396,7 @@ def recent(lines):
 		recents = tail(f, lines=lines)
 		f.close()
 	except: pass
-	
+
 	result = []
 	for rec in recents:
 		d = {}
@@ -406,7 +405,7 @@ def recent(lines):
 		d['url'] = rec
 		d['view_url'] = ripper.working_dir.replace('rips/', 'rips/#')
 		result.append(d)
-	
+
 	print dumps( {
 		'recent' : result
 		} )
@@ -438,7 +437,7 @@ def add_recent(url):
 		if url in tail(f, lines=10): already_added = True
 		f.close()
 		if already_added: return
-	
+
 	f = open('recent_rips.lst', 'a')
 	f.write('%s\n' % url)
 	f.close()
@@ -466,7 +465,7 @@ def albums_by_ip(ip):
 					url = lines[0]
 					url = url[url.rfind(' ')+1:]
 				jsonalbum['url']   = url
-			
+
 			albums.append(jsonalbum)
 	return albums
 

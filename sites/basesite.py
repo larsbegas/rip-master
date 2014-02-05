@@ -54,7 +54,7 @@ class basesite(object):
 			os.mkdir(self.base_dir)
 		self.original_url = url
 		#self.debug('class: %s' % self.__class__.__name__)
-		#self.debug('basesite.__init__ url:' + url)
+		#self.debug('basesite.__init__init__ url:' + url)
 		self.imgsrcpwd = ""
 		self.username = ""
 		if 'pwd=' in url:
@@ -146,10 +146,11 @@ class basesite(object):
 			self.debug('Pic:' + saveas)
 			
 			# Strip extraneous / non FS safe characters
-			if '?' in saveas: saveas = saveas[:saveas.find('?')]
-			if ':' in saveas: saveas = saveas[:saveas.find(':')]
+			saveas = saveas.replace('?:\\', '')
+			#if '?' in saveas: saveas = saveas[:saveas.find('?')]
+			#if ':' in saveas: saveas = saveas[:saveas.find(':')]
 		# Add a file extension if necessary
-		if True: #or (not '.' in saveas):
+		if saveas[len(saveas)-4] != '.':
 			m = self.web.get_meta(url)
 			ct = 'image/jpeg' # Default to jpg
 			if 'Content-Type' in m: ct = m['Content-Type']

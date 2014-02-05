@@ -51,12 +51,16 @@ class webstagram(basesite):
 		while True:
 			chunks = self.web.between(r, '<div class="infolist">', '<div class="like_comment')
 			self.debug('websta down chunks:%s'%len(chunks))
-			for chunk in chunks:
+			if len(chunks) <= 0:
+				if 'This user is private' in r:
+					raise Exception('This user is private')
+			
+			for chunk in chunks:	
 				imgs = self.web.between(chunk, '<a href="', '"')
 				if len(imgs) < 4: continue
 				img = imgs[3].replace('_6.', '_8.')
-				self.debug('found img: %s' % img)
-				if '<div class="hasvideo' in chunk:
+				self.debug('found img3: %s' % img)
+				if 'alt="Play Video' in chunk:
 					vid = img.replace('_8.jpg', '_101.mp4')
 					self.debug('video found, url: %s' % vid)
 					meta = self.web.get_meta(vid)

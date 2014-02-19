@@ -99,7 +99,7 @@ class imgsrc(basesite):
 	""" xxx """
 	def get_gallery_dir(self, url, r='', gallno2=''):
 		splits = url.split('/')
-		self.debug("get_gallery_dir")
+		#self.debug("get_gallery_dir")
 		self.debug(splits)
 		gallno="asdasd"
 		if 'pic_tape' in url:
@@ -112,10 +112,10 @@ class imgsrc(basesite):
 		
 		if r!='':
 			gallnameArray = self.web.between(r, 'iMGSRC.RU</a> ','</td>')
-			self.debug('GallnameArray: %s' % gallnameArray)
+			#self.debug('GallnameArray: %s' % gallnameArray)
 			
 			if 'preword' in url:
-				self.debug('preword gallno PRE: %s' % gallno)
+				#self.debug('preword gallno PRE: %s' % gallno)
 				#window.location='http://imgsrc.ru/marsattacks/22394697.html?pwd=';
 				#asdasd = self.web.between(r, "location=","html")
 				re2 = re.match(r'/\w+/([^\.]+)\.html\?pwd', r, re.M|re.I)
@@ -123,29 +123,28 @@ class imgsrc(basesite):
 				if re2:
 					asdasd = re2.group(0)
 				
-				self.debug(asdasd)
+				#self.debug(asdasd)
 				if asdasd:
 					gallno =  asdasd
 				else:
-					self.debug(gallno2)
+					#self.debug(gallno2)
 					gallno = gallno2
 				
-				self.debug('preword gallno AFTER: %s' % gallno)
+				#self.debug('preword gallno AFTER: %s' % gallno)
 				ret3 = gallno + " - " + gallnameArray[0] + " "
-				self.debug('returning3:%s'%ret3)
+				#self.debug('returning3:%s'%ret3)
 				self.title = gallnameArray[0]
 				return ret3
 				#exit(gallno)
 			
-			self.debug('sadsdsad4444')
 			ret1 = gallnameArray[0] + ' - ' + gallno + ' '
 			self.title = gallno
-			self.debug('returning1:%s'%ret1)
+			#self.debug('returning1:%s'%ret1)
 			return ret1
-		
-		self.debug('sadsdsaqqd2222')
-		self.debug('returning gallno2: %s'%gallno2)
-		self.title = gallno
+			
+		self.title = gallno		
+		self.debug('get_gallery_dir returning: %s'%gallno2)
+		self.debug('get_gallery_dir self-title: %s'%self.title)
 		return gallno2
 	
 	def verify_r(self, r):
@@ -176,7 +175,7 @@ class imgsrc(basesite):
 		else:
 			if (self.imgsrcpwd != "") and ('pwd' not in r):
 				self.url = self.url + "&pwd=" + self.imgsrcpwd
-			self.debug('VERIFY: no CONTINUE or main warn found continue to:%s'%self.url )
+			#self.debug('VERIFY: no CONTINUE or main warn found continue to:%s'%self.url )
 			r = self.web.get(self.url)
 			#exit(r)
 		
@@ -201,7 +200,7 @@ class imgsrc(basesite):
 			atemp_url = self.web.between(r, "href='/main/pic_tape.php?ad=", '\'')[0]
 			if atemp_url.endswith('&pwd='):
 				atemp_url = atemp_url[:atemp_url.find('&')]
-			self.debug("atemp: %s " % atemp_url)
+			#self.debug("atemp: %s " % atemp_url)
 			
 			temp_url = "HHHHHHHH"
 			if atemp_url:
@@ -210,7 +209,7 @@ class imgsrc(basesite):
 				else: temp_url = atemp_url
 			else: raise Exception("pictape fehlt wohl sieh hier")
 			self.url = 'http://imgsrc.ru/main/pic_tape.php?ad=%s' % temp_url
-			self.debug("end download() self.url: %s " % self.url)
+			#self.debug("end download() self.url: %s " % self.url)
 			r = self.web.get(self.url)
 		
 		if not "pic_tape.php" in self.url:
@@ -227,47 +226,55 @@ class imgsrc(basesite):
 		img_total   = 0
 		
 		while True:
-			self.debug("while true:")
+			#self.debug("while true:")
 			#self.debug("RRRR: %s" % r)
 			links = self.web.between(r, 'class="big" src=\'', "'")
-			self.debug("LINKS1:")
+			#self.debug("LINKS1:")
 			self.debug(links)
 			img_total += len(links)
 			
-			#print "LINKS"
-			#print links
-			
 			if len(links) <= 0:
+				self.debug("!!!R88: %s" % r)
 				raise Exception("88")
 			
 			for link2 in links:
-				self.debug("UUUU2 liunk:%s" % link2)
+				self.debug("!!!link2:%s" % link2)
 				splits2 = link2.split('/')
-				self.debug(splits2)
+				#self.debug(splits2)
+				filename = splits2[len(splits2) -1]
+				#self.debug('!!!filename:' + filename)
 				img_index += 1
 				saveas="U1-G1-"
 				gallname2=""
+				username = splits2[4]
 				try:
-					if '.ru/m/' in link2:
-						
+					self.debug('****** username:%s'%username)
+					udb = self.DB.imgsrc.user.find_one({"username": username})
+					if udb == None:
+						self.DB.imgsrc.user.insert({"username": username})
+						self.debug('**************** inserting:%s'%username)
+					
+					if '.ru/m/' in link2:						
 						gallname2 = self.get_gallery_dir(myurl, r)
-						saveas = splits2[4] + " - " + gallname2 + " "
-						self.debug('saveasYY: ' + saveas)
+						saveas = username + " - " + gallname2 + " - " + filename
+						#self.debug('!!!.ru saveas: ' + saveas)
 					else:
 						saveas = link2[link2.rfind('/')+1:]
-						self.debug('saveasZZ: ' + saveas)
+						#self.debug('!!!saveasZ: ' + saveas)
 						gallname2 = self.get_gallery_dir(myurl, r)
 						
-						saveas = gallname2 + ' - ' + saveas
-						self.debug('saveasXX: ' + saveas)
+						saveas = username + " - " + gallname2 + ' - ' + saveas
+						#self.debug('!!!saveasZZ: ' + saveas)
 				except Exception, e:
 					self.debug(e)
 				
 				if '?' in saveas: saveas = saveas[:saveas.find('?')]
-				saveas = re.sub('[.!/#:]', '', saveas)
-				self.debug('now base->down saveas:%s link2:%s gallname2:%s ' \
-					% (saveas, link2, gallname2))
-				self.download_image(link2, img_index, total=img_total, subdir='', saveas=saveas)
+				saveas = re.sub('[.!/#:]', '', saveas[:-4]) + saveas[-4:]
+				#exit('!!!' + saveas) 
+				self.debug('savesas:%s'%saveas)
+				self.debug('link:%s'%link2)
+				self.debug('->down(): gallname2:%s USER:%s' % (gallname2, username))
+				self.download_image(link2, img_index, total=img_total, subdir='imgsrc_%s'%splits2[4], saveas=saveas)
 				#if self.hit_image_limit(): break
 			#if self.hit_image_limit(): break
 			if '>next ' not in r: break

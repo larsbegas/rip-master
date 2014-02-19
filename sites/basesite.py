@@ -16,6 +16,11 @@ try:
 except ImportError:
 	# Python Image Library not installed, no thumbnail support
 	Image = None
+	
+try:
+	from pymongo import MongoClient
+except ImportError:
+	MongoClient = None
 
 LOG_NAME      = 'log.txt' 
 if os.getcwd().endswith('sites'):
@@ -47,6 +52,10 @@ class basesite(object):
 		 * Working directory could not be created.
 	"""
 	def __init__(self, url, debugging=True, location=None):
+		self.DB = None
+		if MongoClient:
+			self.DB = MongoClient()
+			 
 		self.debugging = debugging
 		self.web = Web(debugging=self.debugging) # Web object for downloading/parsing
 		self.base_dir = RIP_DIRECTORY
@@ -158,8 +167,13 @@ class basesite(object):
 			if ext == 'jpeg': ext = 'jpg'
 			saveas = '%s.%s' % (saveas, ext)
 		# Setup subdirectory saves
-		if subdir != '': subdir = '/%s' % subdir
-		savedir = '%s%s' % (self.working_dir, subdir)
+		savedir = ''
+		if subdir != '': 
+			subdir = '/%s' % subdir
+			savedir = '%s%s' % (self.base_dir, subdir)
+		else:
+			savedir = '%s%s' % (self.working_dir, subdir)
+			
 		if not os.path.exists(savedir): os.mkdir(savedir)
 		
 		if unique_saveas:
@@ -194,14 +208,31 @@ class basesite(object):
 			text = 'no image/video/octet-stream in Content-Type (found "%s") for URL %s' % (m['Content-Type'], url)
 		else:
 			indextotal = self.get_index_total(index, total)
-			if self.web.download(url, saveas):
-				self.image_count += 1
-				# Create thumbnail
-				thumbnail = self.create_thumb(saveas)
-				text = 'downloaded %s (%s) - source: (%s) thumbnail: (%s)' % (indextotal, self.get_size(saveas), url, thumbnail)
-			else:
-				text = 'download failed %s - %s' % (indextotal, url)
-		self.log(text)
+			hmm = None
+			text = ""
+			if self.DB:
+				hmm = self.DB.imgsrc.imgurls.find_one({"url": str(url)})
+				if hmm != None:
+					self.debug('*********** url in DB: %s'%str(hmm))
+					#exit(hmm)
+			
+			if hmm == None:		
+				if self.web.download(url, saveas):
+					self.image_count += 1
+					# Create thumbnail
+					thumbnail = self.create_thumb(saveas)
+					if self.DB:
+						imgurls = self.DB.imgsrc.imgurls
+						u96 = imgurls.find_one({"url": str(url)})
+						if u96 != None:
+							text = 'DB FOUND !!!! downloaded %s (%s) - source: (%s) thumbnail: (%s)' % (indextotal, self.get_size(saveas), url, thumbnail)
+						else:
+							imgurls.insert({"url": str(url)})
+							text = 'downloaded %s (%s) - source: (%s) thumbnail: (%s)' % (indextotal, self.get_size(saveas), url, thumbnail)
+				else:
+					text = 'download failed %s - %s' % (indextotal, url)
+		if text != "":
+			self.log(text)
 		self.thread_count -= 1
 
 	""" Same-thread downlod/save (does not launch new thread) """

@@ -11,35 +11,77 @@ class imgsrc(basesite):
 	# http://imgsrc.ru/fotoivanov/a661729.html
 	""" Parse/strip URL to acceptable format """
 	def sanitize_url(self, url):
-		if (not 'imgsrc.ru/' in url) and (not '0xs.ru/' in url):
+		if (not 'imgsrc.r' in url) and (not '0xs.ru/' in url):
 			#print "\n\nURL:%s" % url
-			raise Exception('')
+			raise Exception('namse')
 		u = url
 		pwd = ''
-		self.debug('Sanitizing URL: ' + u)
-		self.debug('self.original_url: ' + self.original_url)
+		#self.debug('Sanitizing URL: ' + u)
+		#self.debug('self.original_url: ' + self.original_url)
 		if "pwd=" in self.original_url:
-			self.debug("pwd= in  %s" % self.original_url)
+			#self.debug("pwd= in  %s" % self.original_url)
 			pwd = self.original_url[self.original_url.find('pwd')+4:]
 			self.imgsrcpwd = pwd
-			self.debug("PWD: %s" % pwd)
+			#self.debug("PWD: %s" % pwd)
 		#print "1"
 		if '?' in u:
 			ad = u[u.find('?'):u.find('&')]
 			u = u[:u.find('?')]
-		self.debug('2')
+		#self.debug('2')
 		u = u.replace('http://', '').replace('https://', '')
 		splits = u.split('/')
-		self.debug("len splits %s " % len(splits))
+		#self.debug("len splits %s " % len(splits))
 		xxx = len(splits)
-		self.debug(xxx)
-		self.debug("** %s **" % " ".join(splits))
+		#self.debug(xxx)
+		#self.debug("** %s **" % " ".join(splits))
 		if xxx>2:
 			if  splits[2] == 'preword.php':
 				self.debug("splits[2] == 'preword.php' url4:%s" % url)
 				r = self.web.get(url)
-				self.debug('4:%s' % r)
-				#print "getting preword: %s \n" % r
+				#self.debug('4:%s' % r)
+				print "getting preword: %s \n" % r
+				
+				#http://imgsrc.ru/main/preword.php?ad=769127&iamlegal=yeah
+				
+				if ('Album foreword' in r):
+					#if "Continue to album" in r:
+					if True:
+						self.debug('666_2_%s' % url)
+						if ('pwd=' in r):
+							#bvb = re.compile('ru\/([^\/]+)\/([^\.]+)\.html\?pwd=')
+							#fcb = bvb.match(r)
+							nurn = self.web.between(r,"window.location='http://imgsrc.ru", '.html?pwd=')
+							self.debug(nurn[0].split('/'))
+							s44 = nurn[0].split('/')
+							return self.sanitize_url('http://imgsrc.ru/%s/%s.html' % (s44[1], s44[2]))
+						else: exit("r4711")
+						#re2b = re.match(r'ru\/([^\/]+)\/([^\.]+)\.html\?pwd', r)
+						re2b = re.match(r'imgsrc\.ru\/([^\/]+)\/([^\.]+)\.html\?pwd', r)
+						self.debug(re2b)
+						nums=""
+						uss = ""
+						if re2b:
+							nums = re2b.group(1)
+							uss = re2b.groups(0)
+							#http://imgsrc.ru/nottooynggirls/26495580.html?pwd=&
+							xxnew = 'http://imgsrc.ru/%s/%s.html' % (uss, nums)
+							self.debug('XXNEEWS %s' % xxnew)
+							return self.sanitize_url(xxnew)
+					
+				if (('Content warning' in r) and not ('iamlegal' in url)):
+					if ('php?ad=' in r):
+						nnn = self.web.between(r, 'php?ad=', '&')
+						return self.sanitize_url('http://imgsrc.ru/main/pic.php?ad=%s' % nnn[0])
+						
+					rrr2 = re.match(r'ad=\d+', r)
+					self.debug(rrr2)
+					if rrr2:
+						exit("kkkkkkkkkkkkk%s" % rrr2.group(0))
+					else: exit("l")
+					url = url + '&iamlegal=yeah'
+					return self.sanitize_url(url)
+					#re2b = re.match(r'/\w+/([^\.]+)\.html\?pwd', r, re.M|re.I)
+					#exit(re2b)
 				
 				r2 = self.web.between(r, 'rel=shortlink', '>')
 				r2b = self.web.between(r, '0xs.ru/', '\'')
@@ -54,18 +96,22 @@ class imgsrc(basesite):
 				#print " r2: %s  " % r2[-1]
 				if self.imgsrcpwd != '':
 					u3 = u3 + '?pwd=' + self.imgsrcpwd
-				self.debug(' u3: %s \n' % u3)
+				#self.debug(' u3: %s \n' % u3)
 				
 				return self.sanitize_url(u3)
 		
 		if ('0xs.ru' in splits):
 			asd = 'http://' + '/'.join(splits)
-			self.debug("\n0xs.ru 1:%s\n\n"%asd)
+			#self.debug("\n0xs.ru 1:%s\n\n"%asd)
 			if self.imgsrcpwd and self.imgsrcpwd != '':
 				asd = asd + '?pwd=' + self.imgsrcpwd
 			
-			self.debug("\n\n0xs.ru 2:%s\n\n"%asd)
+			#self.debug("\n\n0xs.ru 2:%s\n\n"%asd)
 			return asd
+			
+		if('http://imgsrc.ru/main/pic.php?ad=' in url):
+			return url
+		
 		if len(splits) != 3 or \
 				splits[1] == 'main' or \
 				splits[2] == 'pic.php' or \
@@ -76,15 +122,15 @@ class imgsrc(basesite):
 				return 'http://imgsrc.ru/main/pic_tape.php%s&pwd=%s' %  (ad, pwd)
 			elif splits[2] == 'pic_tape.php':
 				return 'http://imgsrc.ru/main/pic_tape.php%s&pwd=%s' %  (ad, pwd)
-			raise Exception('invalid imgsrc url: expected <b>http://imgsrc.ru/&lt;user&gt;/&lt;album&gt;.html</b>')
+			raise Exception('invalid imgsrc url: expected http://imgsrc.ru/user/album.html but got:%s' % url)
 		finret = 'http://imgsrc.ru/%s/%s?pwd=%s' % (splits[1], splits[2], pwd)
-		self.debug('finret:%s'%finret)
+		#self.debug('finret:%s'%finret)
 		return finret
 	
 	""" Discover directory path based on URL """
 	def get_dir(self, url):
 		splits = url.split('/')
-		self.debug(splits)
+		#self.debug(splits)
 		#print '\n'
 		if '.' in splits[-1]: splits[-1] = splits[-1][:splits[-1].find('.')]
 		if splits[-2] == '0xs.ru':
@@ -93,18 +139,18 @@ class imgsrc(basesite):
 			else: return'imgsrc_%s' % (splits[-1])
 			
 		ret1 = (splits[-2])
-		self.debug("returning:%s"%ret1)
+		#self.debug("returning:%s"%ret1)
 		return 'imgsrc_%s' % ret1
 	
 	""" xxx """
 	def get_gallery_dir(self, url, r='', gallno2=''):
 		splits = url.split('/')
 		#self.debug("get_gallery_dir")
-		self.debug(splits)
+		#self.debug(splits)
 		gallno="asdasd"
 		if 'pic_tape' in url:
 			gallno = splits[3]
-			self.debug("gallno = splits 3 :%s"%gallno)
+			#self.debug("gallno = splits 3 :%s"%gallno)
 		elif '.' in splits[-1]:
 			splits[-1] = splits[-1][:splits[-1].find('.')]
 			gallno = splits[-1]
@@ -115,7 +161,7 @@ class imgsrc(basesite):
 			#self.debug('GallnameArray: %s' % gallnameArray)
 			
 			if 'preword' in url:
-				#self.debug('preword gallno PRE: %s' % gallno)
+				#self.debug('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!preword gallno PRE: %s' % gallno)
 				#window.location='http://imgsrc.ru/marsattacks/22394697.html?pwd=';
 				#asdasd = self.web.between(r, "location=","html")
 				re2 = re.match(r'/\w+/([^\.]+)\.html\?pwd', r, re.M|re.I)
@@ -143,21 +189,21 @@ class imgsrc(basesite):
 			return ret1
 			
 		self.title = gallno		
-		self.debug('get_gallery_dir returning: %s'%gallno2)
-		self.debug('get_gallery_dir self-title: %s'%self.title)
+		#self.debug('get_gallery_dir returning: %s'%gallno2)
+		#self.debug('get_gallery_dir self-title: %s'%self.title)
 		return gallno2
 	
 	def verify_r(self, r):
-		self.debug("Verifiy?.. ")
+		#self.debug("Verifiy?.. ")
 		if "href='/main/warn.php" in r:
 			# Need to verify age
 			verify = self.web.between(r, "href='/main/warn.php", "'")[0]
 			verify = 'http://imgsrc.ru/main/warn.php%s' % verify
 			self.web.get(verify)
 			r = self.web.get(self.url)
-			self.debug("yea, verified")
+			#self.debug("yea, verified")
 		
-		#if 'Please enter album\'s password' in r:
+		#if 'Please enter album\'s password' in r://
 			#self.wait_for_threads()
 			#raise Exception('album is password protected')
 		
@@ -167,7 +213,8 @@ class imgsrc(basesite):
 			link = s.find('a', text='Continue to album &gt;&gt;')
 			#for linka in s.find_all('a'):
 			#	self.debug(linka)
-			
+			if link == None:
+				link = link = s.find('a', text='Continue to album')
 			if link != None:
 				self.log('Continue to album: ' + link)
 				r = self.web.get(link.href)
@@ -230,7 +277,7 @@ class imgsrc(basesite):
 			#self.debug("RRRR: %s" % r)
 			links = self.web.between(r, 'class="big" src=\'', "'")
 			#self.debug("LINKS1:")
-			self.debug(links)
+			#self.debug(links)
 			img_total += len(links)
 			
 			if len(links) <= 0:
@@ -238,7 +285,7 @@ class imgsrc(basesite):
 				raise Exception("88")
 			
 			for link2 in links:
-				self.debug("!!!link2:%s" % link2)
+				#self.debug("!!!link2:%s" % link2)
 				splits2 = link2.split('/')
 				#self.debug(splits2)
 				filename = splits2[len(splits2) -1]
@@ -248,11 +295,11 @@ class imgsrc(basesite):
 				gallname2=""
 				username = splits2[4]
 				try:
-					self.debug('****** username:%s'%username)
+					#self.debug('****** username:%s'%username)
 					udb = self.DB.imgsrc.user.find_one({"username": username})
 					if udb == None:
 						self.DB.imgsrc.user.insert({"username": username})
-						self.debug('**************** inserting:%s'%username)
+						#self.debug('**************** inserting:%s'%username)
 					
 					if '.ru/m/' in link2:						
 						gallname2 = self.get_gallery_dir(myurl, r)
@@ -271,9 +318,9 @@ class imgsrc(basesite):
 				if '?' in saveas: saveas = saveas[:saveas.find('?')]
 				saveas = re.sub('[.!/#:]', '', saveas[:-4]) + saveas[-4:]
 				#exit('!!!' + saveas) 
-				self.debug('savesas:%s'%saveas)
-				self.debug('link:%s'%link2)
-				self.debug('->down(): gallname2:%s USER:%s' % (gallname2, username))
+				#self.debug('savesas:%s'%saveas)
+				#self.debug('link:%s'%link2)
+				#self.gdebug('->down(): gallname2:%s USER:%s Saveas:%s link:%s' % (gallname2, username, saveas, link2))
 				self.download_image(link2, img_index, total=img_total, subdir='imgsrc_%s'%splits2[4], saveas=saveas)
 				#if self.hit_image_limit(): break
 			#if self.hit_image_limit(): break

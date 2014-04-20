@@ -37,6 +37,7 @@ from site_vinebox	  import vinebox
 from site_webstagram  import   webstagram
 from site_statigram   import   statigram
 
+from time import sleep
 from Httpy import Httpy
 
 def down(gall):
@@ -52,11 +53,11 @@ def down(gall):
 		i = webstagram(gall, debugging=True)
 	elif('instagram.com' in gall):
 		i = instagram(gall, debugging=True)
-	elif('imgsrc.ru' in gall):
+	elif('imgsrc.r' in gall):
 		i = imgsrc(gall, debugging=True)
 	else:
 		exit('not found ripper for %s' % gall)
-	print "Working_dir: %s url: %s" % (i.working_dir, i.url)
+	#print "Working_dir: %s url: %s" % (i.working_dir, i.url)
 
 	#if("?pwd=&" in gall):
 		#gall = gall[gall.find("\?pwd=&")]
@@ -66,10 +67,10 @@ def down(gall):
 	#	print 'Zip exists: %s' % i.existing_zip_path()
 	#else:
 	try:
-		print 'downloading...'
+		#print 'downloading...'
 		if ('pic_tape' in gall):
 			pwd = i.original_url[i.original_url.find('&')+5:]
-			print "PWD: %s" % pwd
+			#print "PWD: %s" % pwd
 			i.download(pwd=pwd)
 		else:
 			i.download()
@@ -100,16 +101,15 @@ try:
 	failed = []
 	success = []
 	#failed.add("asd")
-	print sys.argv
+	#print sys.argv
 	for gall in sys.argv:
 		if (gall.endswith("test.py")):
 			continue
-		else: print "START: gall: %s \n" % gall
-
-
+		#else: print "START: gall: %s \n" % gall
+		sleep(0.445)
 		i = None
 		gs = gall.split('/')
-		print gs
+		#print gs
 		'''
 		http://www.imagefap.com/profile/immerspass2/galleries?folderid=-1
 		
@@ -125,10 +125,10 @@ try:
 			
 			gallpat = re.compile('\/gallery\/(\d+)')
 			for b in re.findall(gallpat, r):
-				print b
+				#print b
 				galls.add(b)
 			
-			print "galls:%s"%str(galls)
+			#print "galls:%s"%str(galls)
 			for z in galls:
 				z = "http://imagefap.com/gallery/%s" % z
 				if down(z): 
@@ -142,7 +142,7 @@ try:
 		else: 
 			failed.append(gall)
 			
-	print '\n+++++++ ENDE ++++++++++\n'
+	print '\n*++++++ ENDE ++++++++++\n'
 	for su in success:
 		print('success: %s' % su)
 	for fail in failed:
@@ -150,4 +150,4 @@ try:
 	
 	
 except Exception, e:
-    print "\nEXCEPTION: %s" % str(e)
+    print "\nEXCEPTION(%s): %s" % (str(e),str(e.message))

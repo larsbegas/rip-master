@@ -68,11 +68,14 @@ class basesite(object):
 		self.username = ""
 		if 'pwd=' in url:
 			self.imgsrcpwd = url[url.find('pwd')+4:]
-			self.debug('self.imgsrcpwd:%s'%self.imgsrcpwd)
+			#self.debug('imgsrcpwd:%s'%self.imgsrcpwd)
 		self.title=""
 		self.url = self.sanitize_url(url)
 		# Directory to store images in
-		self.working_dir  = '%s%s%s' % (self.base_dir, os.sep, self.get_dir(self.url))
+		galldir = self.get_gallery_dir(self.url)
+		if galldir == '':
+			galldir = self.get_dir(self.url)
+		self.working_dir  = '%s%s%s' % (self.base_dir, os.sep, galldir)
 		self.max_threads  = MAX_THREADS
 		self.thread_count = 0
 		self.image_count  = 0
@@ -117,7 +120,7 @@ class basesite(object):
 	def log(self, text, overwrite=False):
 		if self.first_log:
 			self.first_log = False
-			self.log('mboo - file log for URL %s @ %s' % (self.original_url, strftime('%Y-%m-%dT%H:%M:%S PDT')), overwrite=False)
+			self.log('URL %s @ %s' % (self.original_url, strftime('%Y-%m-%dT%H:%M:%S PDT')), overwrite=False)
 		if self.debugging:
 			sys.stderr.write('%s\n' % text)
 		text = text.replace('"', '\\"')
@@ -142,7 +145,6 @@ class basesite(object):
 	
 	""" Starts separate thread to download image from URL """
 	def download_image(self, url, index, total='?', subdir='', saveas=None, gallname=''):
-		
 		# nur in imgSRc !!!!!!
 		url = url.replace('http://b', 'http://o')  
 		gallname = gallname.replace('/', '_').replace('.', '_')
@@ -152,7 +154,7 @@ class basesite(object):
 			saveas = url[url.rfind('/')+1:]
 			if gallname != '':
 				saveas = gallname + '_' + saveas.replace('\/', '_')
-			self.debug('Pic:' + saveas)
+			#self.debug('Pic:' + saveas)
 			
 			# Strip extraneous / non FS safe characters
 			saveas = saveas.replace('?:\\', '')
@@ -181,7 +183,7 @@ class basesite(object):
 		else:
 			saveas = '%s/%03d_%s' % (savedir, index, saveas)
 		if os.path.exists(saveas):
-			self.log('file exists: %s' % saveas)
+			self.debug('file exists: %s' % saveas)
 			self.image_count += 1
 		else:
 			while self.thread_count > self.max_threads:
@@ -200,8 +202,7 @@ class basesite(object):
 				url = url.replace('http://o', 'http://b')
 				#self.debug("Switching back from O to B:%s m:%s\n" % (url,m))
 				args = (url, saveas, index, total)
-				self.download_image_thread(url, saveas, index, total)
-				return
+				return self.download_image_thread(url, saveas, index, total)
 		elif ('image'        not in m['Content-Type'] and \
 		      'video'        not in m['Content-Type'] and \
 		      'octet-stream' not in m['Content-Type']):
@@ -213,8 +214,8 @@ class basesite(object):
 			if self.DB:
 				hmm = self.DB.imgsrc.imgurls.find_one({"url": str(url)})
 				if hmm != None:
-					self.debug('*********** url in DB: %s'%str(hmm))
-					#exit(hmm)
+					self.debug('(thread) DB: url found: %s'%str(hmm))
+					return 0
 			
 			if hmm == None:		
 				if self.web.download(url, saveas):
@@ -225,15 +226,16 @@ class basesite(object):
 						imgurls = self.DB.imgsrc.imgurls
 						u96 = imgurls.find_one({"url": str(url)})
 						if u96 != None:
-							text = 'DB FOUND !!!! downloaded %s (%s) - source: (%s) thumbnail: (%s)' % (indextotal, self.get_size(saveas), url, thumbnail)
+							text = 'DB u96 %s/%s: (%s)' % (indextotal, self.get_size(saveas), saveas)
 						else:
 							imgurls.insert({"url": str(url)})
-							text = 'downloaded %s (%s) - source: (%s) thumbnail: (%s)' % (indextotal, self.get_size(saveas), url, thumbnail)
+							text = 'vv %s/%s: (%s)' % (indextotal, self.get_size(saveas), saveas)
 				else:
 					text = 'download failed %s - %s' % (indextotal, url)
 		if text != "":
 			self.log(text)
 		self.thread_count -= 1
+		return self.get_size(saveas)
 
 	""" Same-thread downlod/save (does not launch new thread) """
 	def save_image(self, url, saveas, index, total='?'):
@@ -244,9 +246,9 @@ class basesite(object):
 		elif self.web.download(url, saveas):
 			self.image_count += 1
 			thumbnail = self.create_thumb(saveas)
-			self.log('downloaded %s (%s) - source: (%s) thumbnail: (%s)' % (indextotal, self.get_size(saveas), url, thumbnail))
+			self.log('Download %s (%s) - source: (%s)' % (indextotal, self.get_size(saveas), url))
 		else:
-			self.log('download failed %s - %s' % (indextotal, url))
+			self.log('Download %s ERROR << %s' % (indextotal, url))
 
 	""" 
 		Wait for threads to finish downloading.

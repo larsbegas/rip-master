@@ -55,14 +55,16 @@ class imagefap(basesite):
 			username = 'DEFAULT'
 		r = r[r.find('showMoreGalleries'):] # To ignore user icon
 		links = self.web.between(r, 'fap.to/images/thumb/', '"')
-		self.debug('title:%s' % title)
-		self.debug('user:%s' % username)
+		#self.debug('title:%s' % title)
+		#self.debug('user:%s' % username)
 		
 		for (index, link) in enumerate(links):
 			pid = link[7:-4]
-			ext = link[-3:]
+			ext = link[-4:]
+			if ext.startswith('.'):
+				ext = ext[-3:]
 			saveas = username + ' - ' + title + ' (' + pid + ').' + ext
-			self.debug('Saveas:%s' % saveas)
+			#self.debug('Saveas:%s' % saveas)
 			link = 'http://fap.to/images/full/%s' % link
 			self.download_image(link, index + 1, total=len(links), saveas=saveas, subdir=username)
 			if self.hit_image_limit(): break
